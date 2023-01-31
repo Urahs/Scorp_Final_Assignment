@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.scorp_final_assignment.HomeFragment"
+        android:name="com.example.scorp_final_assignment.ui.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -16,7 +16,7 @@
     </fragment>
     <fragment
         android:id="@+id/liveChatFragment"
-        android:name="com.example.scorp_final_assignment.LiveChatFragment"
+        android:name="com.example.scorp_final_assignment.ui.LiveChatFragment"
         android:label="fragment_live_chat"
         tools:layout="@layout/fragment_live_chat" >
         <action

@@ -1,10 +1,11 @@
-package com.example.scorp_final_assignment
+package com.example.scorp_final_assignment.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.scorp_final_assignment.R
 
 class LiveChatFragment : Fragment() {
 
