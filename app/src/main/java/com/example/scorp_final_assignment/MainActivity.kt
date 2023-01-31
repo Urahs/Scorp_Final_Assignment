@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = binding.fragmentContainerView as NavHostFragment
-        navController = navHostFragment.navController
+        //val navHostFragment = binding.fragmentContainerView as NavHostFragment
+        //navController = navHostFragment.navController
     }
 
 
