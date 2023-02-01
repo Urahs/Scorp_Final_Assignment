@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentHomeBinding
 import com.example.scorp_final_assignment.repository.Repository.MinNickNameLength
+import dagger.hilt.android.AndroidEntryPoint
 
 class HomeFragment : Fragment() {
 
@@ -73,7 +74,7 @@ class HomeFragment : Fragment() {
 
     private fun progressButtonClicked(){
 
-        var errorMessage = "You should give the following permission(s) before continue\n\n"
+        var errorMessage = "Following permission(s) was not granted\n\n"
         var permissionsGranted = true
         if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
             errorMessage += " ➜ CAMERA\n"
