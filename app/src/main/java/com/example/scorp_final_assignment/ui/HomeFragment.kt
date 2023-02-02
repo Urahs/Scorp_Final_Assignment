@@ -73,38 +73,8 @@ class HomeFragment : Fragment() {
 
 
     private fun progressButtonClicked(){
+        findNavController().navigate(R.id.action_homeFragment_to_liveChatFragment)
 
-        var errorMessage = "Following permission(s) was not granted\n\n"
-        var permissionsGranted = true
-        if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)){
-            errorMessage += " ➜ CAMERA\n"
-            permissionsGranted = false
-        }
-        if(shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)){
-            errorMessage += " ➜ AUDIO\n"
-            permissionsGranted = false
-        }
-
-        if(permissionsGranted){
-            requestPermission.launch(
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO
-                )
-            )
-        }
-        else{
-            val dialog = Dialog(requireContext())
-            dialog.setContentView(R.layout.custom_permission_dialog)
-            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            errorMessage += "\nYou may want to go \"Settings > Apps\" and allow the required permissions"
-            dialog.findViewById<TextView>(R.id.messageTV).text = errorMessage
-            val okayBtn = dialog.findViewById<Button>(R.id.okayBtn)
-            okayBtn.setOnClickListener {
-                dialog.dismiss()
-            }
-            dialog.show()
-        }
     }
 
     override fun onDestroyView() {
