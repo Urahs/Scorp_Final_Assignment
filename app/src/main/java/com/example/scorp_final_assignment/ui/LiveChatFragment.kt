@@ -41,11 +41,13 @@ class LiveChatFragment : Fragment() {
 
     private val PERMISSION_REQ_ID = 22
     private val REQUESTED_PERMISSIONS = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
         Manifest.permission.CAMERA
     )
 
     private fun checkSelfPermission(): Boolean {
-        return !(ContextCompat.checkSelfPermission(requireContext(), REQUESTED_PERMISSIONS[0] ) != PackageManager.PERMISSION_GRANTED ) }
+        return !(ContextCompat.checkSelfPermission(requireContext(), REQUESTED_PERMISSIONS[0] ) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(requireContext(), REQUESTED_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED)    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
