@@ -39,16 +39,6 @@ class LiveChatFragment : Fragment() {
     private var isJoined = false
 
 
-    private val PERMISSION_REQ_ID = 22
-    private val REQUESTED_PERMISSIONS = arrayOf(
-        Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.CAMERA
-    )
-
-    private fun checkSelfPermission(): Boolean {
-        return !(ContextCompat.checkSelfPermission(requireContext(), REQUESTED_PERMISSIONS[0] ) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(requireContext(), REQUESTED_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED)    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,9 +46,6 @@ class LiveChatFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
 
-        if (!checkSelfPermission()) {
-            ActivityCompat.requestPermissions(requireActivity(), REQUESTED_PERMISSIONS, PERMISSION_REQ_ID)
-        }
         setupVideoSDKEngine()
 
         return binding.root
@@ -76,7 +63,6 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-
     private fun setupVideoSDKEngine() {
         try {
             val config = RtcEngineConfig()
@@ -91,14 +77,12 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-
     private val mRtcEventHandler: IRtcEngineEventHandler = object : IRtcEngineEventHandler() {
         // Listen for the remote host joining the channel to get the uid of the host.
         override fun onUserJoined(uid: Int, elapsed: Int) {
             showMessage("Remote user joined $uid")
 
             // Set the remote video view
-            //runOnUiThread { setupRemoteVideo(uid) }
             activity!!.runOnUiThread {
                 setupRemoteVideo(uid)
             }
@@ -111,21 +95,19 @@ class LiveChatFragment : Fragment() {
 
         override fun onUserOffline(uid: Int, reason: Int) {
             showMessage("Remote user offline $uid $reason")
-            //runOnUiThread { remoteSurfaceView!!.visibility = View.GONE }
+
             activity!!.runOnUiThread {
                 remoteSurfaceView!!.visibility = View.GONE
             }
         }
     }
 
-    // TODO AAAAAAAAAA ------------------------------
     private fun setupRemoteVideo(uid: Int) {
         val container = binding.remoteVideoViewContainer
         remoteSurfaceView = SurfaceView(context)
-        // TODO: not neccessary I think (!)
         remoteSurfaceView!!.setZOrderMediaOverlay(true)
         container.addView(remoteSurfaceView)
-        agoraEngine!!.setupRemoteVideo( // TODO VM JOB HERE!!!
+        agoraEngine!!.setupRemoteVideo(
             VideoCanvas(
                 remoteSurfaceView,
                 VideoCanvas.RENDER_MODE_FIT,
@@ -152,25 +134,20 @@ class LiveChatFragment : Fragment() {
     }
 
     fun joinChannel() {
-        if (checkSelfPermission()) {
-            val options = ChannelMediaOptions()
+        val options = ChannelMediaOptions()
 
-            // For a Video call, set the channel profile as COMMUNICATION.
-            options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION
-            // Set the client role as BROADCASTER or AUDIENCE according to the scenario.
-            options.clientRoleType = Constants.CLIENT_ROLE_BROADCASTER
-            // Display LocalSurfaceView.
-            setupLocalVideo()
-            localSurfaceView!!.visibility = View.VISIBLE
-            // Start local preview.
-            agoraEngine!!.startPreview()
-            // Join the channel with a temp token.
-            // You need to specify the user ID yourself, and ensure that it is unique in the channel.
-            agoraEngine!!.joinChannel(null, ChannelName, uid, options)
-        } else {
-            Toast.makeText(requireContext(), "Permissions was not granted", Toast.LENGTH_SHORT)
-                .show()
-        }
+        // For a Video call, set the channel profile as COMMUNICATION.
+        options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION
+        // Set the client role as BROADCASTER or AUDIENCE according to the scenario.
+        options.clientRoleType = Constants.CLIENT_ROLE_BROADCASTER
+        // Display LocalSurfaceView.
+        setupLocalVideo()
+        localSurfaceView!!.visibility = View.VISIBLE
+        // Start local preview.
+        agoraEngine!!.startPreview()
+        // Join the channel with a temp token.
+        // You need to specify the user ID yourself, and ensure that it is unique in the channel.
+        agoraEngine!!.joinChannel(null, ChannelName, uid, options)
     }
 
     fun leaveChannel() {
