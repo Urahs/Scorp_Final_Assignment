@@ -110,7 +110,7 @@ class LiveChatFragment : Fragment() {
         agoraEngine!!.setupRemoteVideo(
             VideoCanvas(
                 remoteSurfaceView,
-                VideoCanvas.RENDER_MODE_FIT,
+                VideoCanvas.RENDER_MODE_HIDDEN,
                 uid
             )
         )
