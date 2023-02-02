@@ -1,26 +1,20 @@
 package com.example.scorp_final_assignment.ui
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.media.session.MediaSession.Token
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.AppID
-import com.example.scorp_final_assignment.repository.Repository.ChannelName
+import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class LiveChatFragment : Fragment() {
@@ -147,7 +141,7 @@ class LiveChatFragment : Fragment() {
         agoraEngine!!.startPreview()
         // Join the channel with a temp token.
         // You need to specify the user ID yourself, and ensure that it is unique in the channel.
-        agoraEngine!!.joinChannel(null, ChannelName, uid, options)
+        agoraEngine!!.joinChannel(null, ChannelID, uid, options)
     }
 
     fun leaveChannel() {
