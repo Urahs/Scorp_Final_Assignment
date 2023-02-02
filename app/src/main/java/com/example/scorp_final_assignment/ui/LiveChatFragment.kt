@@ -16,6 +16,11 @@ import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
 import kotlinx.coroutines.launch
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.example.scorp_final_assignment.repository.Repository.Token
+import io.agora.rtm.*
 
 class LiveChatFragment : Fragment() {
 
@@ -23,6 +28,7 @@ class LiveChatFragment : Fragment() {
 
     private var _binding: FragmentLiveChatBinding? = null
     private val binding get() = _binding!!
+
 
     //SurfaceView to render local video in a Container.
     private var localSurfaceView: SurfaceView? = null
@@ -33,6 +39,29 @@ class LiveChatFragment : Fragment() {
     private var isJoined = false
 
 
+
+    // <Vg k="MESS" /> client instance
+    private var mRtmClient: RtmClient? = null
+
+    // <Vg k="MESS" /> channel instance
+    private var mRtmChannel: RtmChannel? = null
+
+    // TextView to show message records in the UI
+    private var message_history: TextView? = null
+
+    private var et_message_content: EditText? = null
+
+    // <Vg k="MESS" /> user ID of the message receiver
+    private var peer_id: String? = null
+
+    // Message content
+    private var message_content: String? = null
+
+    private  val user_name = "behzat"
+
+
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,6 +70,41 @@ class LiveChatFragment : Fragment() {
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
 
         setupVideoSDKEngine()
+
+        try {
+            mRtmClient = RtmClient.createInstance(requireContext(), AppID, object : RtmClientListener {
+                override fun onConnectionStateChanged(state: Int, reason: Int) {
+                    val text = "Connection state changed to $state Reason: $reason\n"
+                    writeToMessageHistory(text)
+                }
+
+                override fun onImageMessageReceivedFromPeer(rtmImageMessage: RtmImageMessage, s: String) {
+                }
+
+                override fun onFileMessageReceivedFromPeer(rtmFileMessage: RtmFileMessage, s: String) {
+                }
+
+                override fun onMediaUploadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {
+                }
+
+                override fun onMediaDownloadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {
+                }
+
+                override fun onTokenExpired() {
+                }
+
+                override fun onPeersOnlineStatusChanged(map: Map<String, Int>) {
+                }
+
+                override fun onMessageReceived(rtmMessage: RtmMessage, peerId: String) {
+                    val text = "Message received from $peerId Message: ${rtmMessage.text}\n"
+                    writeToMessageHistory(text)
+                }
+            })
+        } catch (e: Exception) {
+            throw RuntimeException("initialization failed!")
+        }
+
 
         return binding.root
     }
@@ -55,8 +119,22 @@ class LiveChatFragment : Fragment() {
         binding.LeaveButton.setOnClickListener {
             leaveChannel()
         }
+
+        binding.sendChannelMsgButton.setOnClickListener{
+            onClickSendChannelMsg()
+        }
+
+        loginTextChat()
+        joinTextChat()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+
+    //region video chat
     private fun setupVideoSDKEngine() {
         try {
             val config = RtcEngineConfig()
@@ -163,9 +241,135 @@ class LiveChatFragment : Fragment() {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
+    //endregion
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+
+
+
+    //region text chat
+
+    // Button to login to Signaling
+    fun loginTextChat() {
+        // Log in to Signaling
+        mRtmClient!!.login(Token, user_name, object : ResultCallback<Void?> {
+            override fun onSuccess(responseInfo: Void?) {}
+            override fun onFailure(errorInfo: ErrorInfo) {
+                val text: CharSequence = "User: $uid failed to log in to Signaling!$errorInfo"
+                val duration = Toast.LENGTH_SHORT
+                activity!!.runOnUiThread {
+                    val toast = Toast.makeText(context, text, duration)
+                    toast.show()
+                }
+            }
+        })
     }
+
+
+    // Button to join the <Vg k="MESS" /> channel
+    fun joinTextChat() {
+        //channel_name = et_channel_name!!.getText().toString()
+        // Create a channel listener
+        val mRtmChannelListener: RtmChannelListener = object : RtmChannelListener {
+            override fun onMemberCountUpdated(i: Int) {}
+            override fun onAttributesUpdated(list: List<RtmChannelAttribute>) {}
+            override fun onMessageReceived(message: RtmMessage, fromMember: RtmChannelMember) {
+                val text = message.text
+                val fromUser = fromMember.userId
+                val message_text = "Message received from $fromUser : $text\n"
+                writeToMessageHistory(message_text)
+            }
+
+            override fun onImageMessageReceived(
+                rtmImageMessage: RtmImageMessage,
+                rtmChannelMember: RtmChannelMember
+            ) {
+            }
+
+            override fun onFileMessageReceived(
+                rtmFileMessage: RtmFileMessage,
+                rtmChannelMember: RtmChannelMember
+            ) {
+            }
+
+            override fun onMemberJoined(member: RtmChannelMember) {}
+            override fun onMemberLeft(member: RtmChannelMember) {}
+        }
+        try {
+            // Create an <Vg k="MESS" /> channel
+            mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
+        } catch (e: RuntimeException) {
+        }
+        // Join the <Vg k="MESS" /> channel
+        mRtmChannel!!.join(object : ResultCallback<Void?> {
+            override fun onSuccess(responseInfo: Void?) {}
+            override fun onFailure(errorInfo: ErrorInfo) {
+                //val text: CharSequence = "User: $uid failed to join the channel!$errorInfo"
+                val text: CharSequence = "$errorInfo"
+                val duration = Toast.LENGTH_SHORT
+                activity!!.runOnUiThread {
+                    val toast = Toast.makeText(context, text, duration)
+                    toast.show()
+                }
+            }
+        })
+    }
+
+    // Button to log out of Signaling
+    fun onClickLogout(v: View?) {
+        // Log out of Signaling
+        mRtmClient!!.logout(null)
+    }
+
+    // Button to leave the <Vg k="MESS" /> channel
+    fun onClickLeave(v: View?) {
+        // Leave the <Vg k="MESS" /> channel
+        mRtmChannel!!.leave(null)
+    }
+
+    // Button to send channel message
+    fun onClickSendChannelMsg() {
+        et_message_content = binding.msgBox
+        message_content = et_message_content!!.getText().toString()
+
+        // Create <Vg k="MESS" /> message instance
+        val message = mRtmClient!!.createMessage()
+        message.text = message_content
+
+        // Send message to channel
+        mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
+            override fun onSuccess(aVoid: Void?) {
+                val text = """Message sent to channel ${mRtmChannel!!.id} : ${message.text}"""
+                writeToMessageHistory(text)
+            }
+
+            override fun onFailure(errorInfo: ErrorInfo) {
+                val text = """Message fails to send to channel ${mRtmChannel!!.id} Error: $errorInfo"""
+                writeToMessageHistory(text)
+            }
+        })
+    }
+
+    private fun writeToMessageHistory(record: String) {
+        message_history = binding.messageHistory
+        message_history!!.append(record)
+    }
+
+
+    //endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
