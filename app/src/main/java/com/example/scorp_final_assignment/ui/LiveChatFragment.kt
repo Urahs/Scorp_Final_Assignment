@@ -97,7 +97,7 @@ class LiveChatFragment : Fragment() {
 
             // Set the remote video view
             //runOnUiThread { setupRemoteVideo(uid) }
-            lifecycleScope.launch(Dispatchers.IO){
+            activity!!.runOnUiThread {
                 setupRemoteVideo(uid)
             }
         }
@@ -110,7 +110,7 @@ class LiveChatFragment : Fragment() {
         override fun onUserOffline(uid: Int, reason: Int) {
             showMessage("Remote user offline $uid $reason")
             //runOnUiThread { remoteSurfaceView!!.visibility = View.GONE }
-            lifecycleScope.launch(Dispatchers.IO){
+            activity!!.runOnUiThread {
                 remoteSurfaceView!!.visibility = View.GONE
             }
         }
