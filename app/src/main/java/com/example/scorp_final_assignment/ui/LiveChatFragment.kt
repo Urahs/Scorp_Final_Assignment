@@ -11,9 +11,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 class LiveChatFragment : Fragment() {
 
@@ -45,13 +45,15 @@ class LiveChatFragment : Fragment() {
 
         viewModel.setupRemoteVideo.observe(viewLifecycleOwner){
             lifecycleScope.launch(Dispatchers.IO) {
-                setupRemoteVideo()
+                if(it)
+                    setupRemoteVideo()
             }
         }
 
         viewModel.remoteSurfaceViewVisibility.observe(viewLifecycleOwner){
             lifecycleScope.launch(Dispatchers.IO) {
-                remoteSurfaceView!!.visibility = View.GONE
+                if(!it)
+                    remoteSurfaceView!!.visibility = View.GONE
             }
         }
 
@@ -66,7 +68,7 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun setupVideoSDKEngine() {
-        viewModel.setupVideoSDKEngine()
+        viewModel.setupVideoSDKEngine(requireContext())
     }
 
     private fun setupRemoteVideo() {

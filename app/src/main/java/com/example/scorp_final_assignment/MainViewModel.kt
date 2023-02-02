@@ -1,6 +1,7 @@
 package com.example.scorp_final_assignment
 
 import android.app.Application
+import android.content.Context
 import android.view.SurfaceView
 import android.view.View
 import android.widget.Toast
@@ -19,11 +20,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.properties.Delegates
 
-
+/*
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val application: Application
 ): ViewModel() {
+*/
+class MainViewModel(): ViewModel() {
 
     private var agoraEngine: RtcEngine? = null
     var onUserJoinedUid by Delegates.notNull<Int>()
@@ -31,7 +34,7 @@ class MainViewModel @Inject constructor(
     private val _setupRemoteVideo = MutableLiveData(false)
     val setupRemoteVideo: LiveData<Boolean> = _setupRemoteVideo
 
-    private val _remoteSurfaceViewVisibility = MutableLiveData(false)
+    private val _remoteSurfaceViewVisibility = MutableLiveData(true)
     val remoteSurfaceViewVisibility: LiveData<Boolean> = _remoteSurfaceViewVisibility
 
     var isJoined = false
@@ -41,14 +44,14 @@ class MainViewModel @Inject constructor(
 
     fun showMessage(message: String?) {
         viewModelScope.launch {
-            Toast.makeText(application, message, Toast.LENGTH_SHORT).show()
+            //Toast.makeText(application, message, Toast.LENGTH_SHORT).show()
         }
     }
 
-    fun setupVideoSDKEngine() {
+    fun setupVideoSDKEngine(context: Context) {
         try {
             val config = RtcEngineConfig()
-            config.mContext = application
+            config.mContext = context
             config.mAppId = AppID
             config.mEventHandler = mRtcEventHandler
             agoraEngine = RtcEngine.create(config)
