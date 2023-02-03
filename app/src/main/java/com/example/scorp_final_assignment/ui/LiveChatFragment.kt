@@ -1,6 +1,7 @@
 package com.example.scorp_final_assignment.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
@@ -18,7 +19,8 @@ import io.agora.rtc2.video.VideoCanvas
 import kotlinx.coroutines.launch
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import com.example.scorp_final_assignment.adapters.MessageAdapter
+import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.repository.Repository.Token
 import io.agora.rtm.*
 
@@ -28,6 +30,9 @@ class LiveChatFragment : Fragment() {
 
     private var _binding: FragmentLiveChatBinding? = null
     private val binding get() = _binding!!
+
+    var textAdapter = TextAdapter()
+    var messageAdapter = MessageAdapter()
 
 
     //SurfaceView to render local video in a Container.
@@ -68,6 +73,8 @@ class LiveChatFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
+
+        binding.textRecyclerView.adapter = messageAdapter
 
         setupVideoSDKEngine()
 
@@ -334,7 +341,6 @@ class LiveChatFragment : Fragment() {
         // Create <Vg k="MESS" /> message instance
         val message = mRtmClient!!.createMessage()
         message.text = message_content
-
         // Send message to channel
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
@@ -350,26 +356,9 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun writeToMessageHistory(record: String) {
-        message_history = binding.messageHistory
-        message_history!!.append(record)
+        val currentMessages = messageAdapter.currentList.toMutableList()
+        currentMessages.add(record)
+        messageAdapter.submitList(currentMessages)
     }
-
-
     //endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
