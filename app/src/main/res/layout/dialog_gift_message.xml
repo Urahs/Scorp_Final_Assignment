@@ -3,23 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:paddingLeft="10dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:elevation="5dp"
-        app:cardCornerRadius="30dp"
-        android:backgroundTint="#DDDDDD"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="20dp">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="16dp"
-            android:orientation="vertical">
-
 
             <ImageView
                 android:id="@+id/clubIV"
@@ -27,7 +13,7 @@
                 android:layout_height="80dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:srcCompat="@drawable/club" />
+                tools:srcCompat="@android:drawable/presence_video_busy" />
 
             <ImageView
                 android:id="@+id/diamondIV"
@@ -54,7 +40,7 @@
                 android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/spadeIV"
-                tools:srcCompat="@drawable/hearth" />
+                tools:srcCompat="@android:drawable/btn_radio" />
 
             <TextView
                 android:id="@+id/clubTV"
@@ -109,9 +95,5 @@
                 app:layout_constraintStart_toEndOf="@+id/clubIV"
                 app:layout_constraintTop_toTopOf="@+id/hearthIV" />
 
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

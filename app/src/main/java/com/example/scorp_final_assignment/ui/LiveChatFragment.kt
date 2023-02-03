@@ -6,10 +6,12 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.SpannableString
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -29,6 +31,8 @@ import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.Token
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import io.agora.rtm.*
 
 class LiveChatFragment : Fragment() {
@@ -395,10 +399,24 @@ class LiveChatFragment : Fragment() {
 
     private fun showGiftMessages() {
 
-        val dialog = Dialog(requireContext())
+        val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_gift_message)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val clubIV = dialog.findViewById<TextView>(R.id.clubIV) as ImageView
+        val spadeIV = dialog.findViewById<TextView>(R.id.spadeIV) as ImageView
+        val hearthIV = dialog.findViewById<TextView>(R.id.hearthIV) as ImageView
+        val diamongIV = dialog.findViewById<TextView>(R.id.diamondIV) as ImageView
+
+        clubIV.setImageResource(R.drawable.club)
+        spadeIV.setImageResource(R.drawable.spade)
+        hearthIV.setImageResource(R.drawable.hearth)
+        diamongIV.setImageResource(R.drawable.diamond)
+
         //dialog.setTitle("Item Details")
+        //dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        //dialog.window?.setGravity(Gravity.BOTTOM)
         dialog.show()
     }
 
