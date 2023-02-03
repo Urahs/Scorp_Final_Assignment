@@ -1,6 +1,10 @@
 package com.example.scorp_final_assignment.ui
 
+import android.app.Dialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.SpannableString
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
@@ -17,9 +21,11 @@ import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
 import kotlinx.coroutines.launch
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
+import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.Token
@@ -132,6 +138,10 @@ class LiveChatFragment : Fragment() {
 
         binding.sendChannelMsgButton.setOnClickListener{
             onClickSendChannelMsg()
+        }
+
+        binding.giftButton.setOnClickListener{
+            showGiftMessages()
         }
 
         /*
@@ -380,5 +390,31 @@ class LiveChatFragment : Fragment() {
 
         //binding.textRecyclerView.scrollToPosition(0)
     }
+
+
+
+    private fun showGiftMessages() {
+
+        val dialog = Dialog(requireContext())
+        dialog.setContentView(R.layout.dialog_gift_message)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        //dialog.setTitle("Item Details")
+        dialog.show()
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //endregion
 }
