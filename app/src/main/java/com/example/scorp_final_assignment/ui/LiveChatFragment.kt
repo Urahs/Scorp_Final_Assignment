@@ -347,21 +347,22 @@ class LiveChatFragment : Fragment() {
         message_content = et_message_content!!.getText().toString()
 
         // Create <Vg k="MESS" /> message instance
-        //val message = mRtmClient!!.createMessage()
-        val bytes: ByteArray = byteArrayOf(0x02)
-        val byteMessage = mRtmClient!!.createMessage(bytes)
-        val message = mRtmClient!!.createMessage(bytes)
-        //message.text = message_content
+        //val bytes: ByteArray = byteArrayOf(0x02)
+        //val message = mRtmClient!!.createMessage(bytes)
+
+        val message = mRtmClient!!.createMessage()
+        message.text = message_content
         // Send message to channel
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
                 val text = "${viewModel.nickName} : ${message.text}"
                 writeToMessageHistory(text)
-
-
+                /*
+                Log.d("Deneme", message.rawMessage.toString())
                 if(message.rawMessage.contentEquals(byteArrayOf(0x02))){
                     Log.d("Deneme", "KUDURRRRRRRDUMMMMMM!!!!")
                 }
+                */
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
