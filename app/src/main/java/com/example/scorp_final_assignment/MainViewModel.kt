@@ -10,4 +10,15 @@ class MainViewModel @Inject constructor(
 */
 class MainViewModel(): ViewModel() {
 
+    /*
+    private val _nickName: MutableLiveData<String> = MutableLiveData("selim boi")
+    val nickName: LiveData<String> = _nickName
+     */
+
+    var nickName: String = "aaa"
+        private set
+
+    fun changeNickName(value: String){
+        nickName = value
+    }
 }

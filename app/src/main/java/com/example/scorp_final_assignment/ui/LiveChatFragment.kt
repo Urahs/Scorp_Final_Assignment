@@ -19,6 +19,7 @@ import io.agora.rtc2.video.VideoCanvas
 import kotlinx.coroutines.launch
 import android.widget.EditText
 import android.widget.TextView
+import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.repository.Repository.Token
@@ -26,7 +27,7 @@ import io.agora.rtm.*
 
 class LiveChatFragment : Fragment() {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentLiveChatBinding? = null
     private val binding get() = _binding!!
@@ -35,6 +36,7 @@ class LiveChatFragment : Fragment() {
     var messageAdapter = MessageAdapter()
 
 
+    //region video chat variables
     //SurfaceView to render local video in a Container.
     private var localSurfaceView: SurfaceView? = null
     //SurfaceView to render Remote video in a Container.
@@ -42,9 +44,9 @@ class LiveChatFragment : Fragment() {
     private var agoraEngine: RtcEngine? = null
     private val uid = 0
     private var isJoined = false
+    //endregion
 
-
-
+    //region message chat variables
     // <Vg k="MESS" /> client instance
     private var mRtmClient: RtmClient? = null
 
@@ -62,11 +64,12 @@ class LiveChatFragment : Fragment() {
     // Message content
     private var message_content: String? = null
 
-    private  val user_name = "behzat"
+    //private var nickName: String = "behzat c"
+    //endregion
 
 
 
-
+    //region fragment override functions
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -131,6 +134,12 @@ class LiveChatFragment : Fragment() {
             onClickSendChannelMsg()
         }
 
+        /*
+        viewModel.nickName.observe(viewLifecycleOwner){
+            nickName = it
+        }
+        */
+
         loginTextChat()
         joinTextChat()
     }
@@ -139,9 +148,10 @@ class LiveChatFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+    //endregion
 
 
-    //region video chat
+    //region video chat section
     private fun setupVideoSDKEngine() {
         try {
             val config = RtcEngineConfig()
@@ -248,17 +258,15 @@ class LiveChatFragment : Fragment() {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
-    //endregion
+    //endregion section
 
 
-
-
-    //region text chat
+    //region text chat section
 
     // Button to login to Signaling
     fun loginTextChat() {
         // Log in to Signaling
-        mRtmClient!!.login(Token, user_name, object : ResultCallback<Void?> {
+        mRtmClient!!.login(Token, viewModel.nickName, object : ResultCallback<Void?> {
             override fun onSuccess(responseInfo: Void?) {}
             override fun onFailure(errorInfo: ErrorInfo) {
                 val text: CharSequence = "User: $uid failed to log in to Signaling!$errorInfo"
@@ -344,12 +352,13 @@ class LiveChatFragment : Fragment() {
         // Send message to channel
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
-                val text = """Message sent to channel ${mRtmChannel!!.id} : ${message.text}"""
+                val text = "${viewModel.nickName} : ${message.text}"
+                Log.d("Deneme", viewModel.nickName)
                 writeToMessageHistory(text)
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
-                val text = """Message fails to send to channel ${mRtmChannel!!.id} Error: $errorInfo"""
+                val text = "${mRtmChannel!!.id} Error: $errorInfo"
                 writeToMessageHistory(text)
             }
         })

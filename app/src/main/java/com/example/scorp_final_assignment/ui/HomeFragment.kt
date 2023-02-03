@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -17,14 +18,19 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
+import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentHomeBinding
 import com.example.scorp_final_assignment.repository.Repository.MinNickNameLength
 import dagger.hilt.android.AndroidEntryPoint
 
 class HomeFragment : Fragment() {
+
+    private val viewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -36,8 +42,10 @@ class HomeFragment : Fragment() {
             if(it.value)
                 permissionCounter++
         }
-        if(permissionCounter == permissions.size)
+        if(permissionCounter == permissions.size){
+            viewModel.changeNickName(binding.nickNameTV.text.toString())
             findNavController().navigate(R.id.action_homeFragment_to_liveChatFragment)
+        }
     }
 
     override fun onCreateView(
@@ -105,7 +113,6 @@ class HomeFragment : Fragment() {
             dialog.show()
         }
     }
-
 
 
     override fun onDestroyView() {
