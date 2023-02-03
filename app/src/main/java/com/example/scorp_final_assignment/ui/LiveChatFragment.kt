@@ -11,7 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.scorp_final_assignment.MainViewModel
-import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.AppID
 import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
@@ -22,6 +21,7 @@ import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.adapters.TextAdapter
+import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.Token
 import io.agora.rtm.*
 
@@ -258,7 +258,7 @@ class LiveChatFragment : Fragment() {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
-    //endregion section
+    //endregion
 
 
     //region text chat section
@@ -347,14 +347,21 @@ class LiveChatFragment : Fragment() {
         message_content = et_message_content!!.getText().toString()
 
         // Create <Vg k="MESS" /> message instance
-        val message = mRtmClient!!.createMessage()
-        message.text = message_content
+        //val message = mRtmClient!!.createMessage()
+        val bytes: ByteArray = byteArrayOf(0x02)
+        val byteMessage = mRtmClient!!.createMessage(bytes)
+        val message = mRtmClient!!.createMessage(bytes)
+        //message.text = message_content
         // Send message to channel
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
                 val text = "${viewModel.nickName} : ${message.text}"
-                Log.d("Deneme", viewModel.nickName)
                 writeToMessageHistory(text)
+
+
+                if(message.rawMessage.contentEquals(byteArrayOf(0x02))){
+                    Log.d("Deneme", "KUDURRRRRRRDUMMMMMM!!!!")
+                }
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
@@ -368,6 +375,9 @@ class LiveChatFragment : Fragment() {
         val currentMessages = messageAdapter.currentList.toMutableList()
         currentMessages.add(record)
         messageAdapter.submitList(currentMessages)
+        //messageAdapter.notifyDataSetChanged()
+
+        //binding.textRecyclerView.scrollToPosition(0)
     }
     //endregion
 }
