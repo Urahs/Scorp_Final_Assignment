@@ -34,7 +34,7 @@
                 tools:srcCompat="@drawable/spade" />
 
             <ImageView
-                android:id="@+id/hearthIV"
+                android:id="@+id/heartIV"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginTop="20dp"
@@ -89,11 +89,11 @@
                 android:text="Hearth"
                 android:textColor="@color/black"
                 android:textSize="25sp"
-                app:layout_constraintBottom_toBottomOf="@+id/hearthIV"
+                app:layout_constraintBottom_toBottomOf="@+id/heartIV"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/clubIV"
-                app:layout_constraintTop_toTopOf="@+id/hearthIV" />
+                app:layout_constraintTop_toTopOf="@+id/heartIV" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

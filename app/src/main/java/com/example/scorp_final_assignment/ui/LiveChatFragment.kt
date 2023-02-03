@@ -1,20 +1,18 @@
 package com.example.scorp_final_assignment.ui
 
-import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.Image
 import android.os.Bundle
-import android.text.SpannableString
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.repository.Repository.AppID
@@ -31,9 +29,15 @@ import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.repository.Repository.Token
+import com.example.scorp_final_assignment.repository.Repository.clubGift
+import com.example.scorp_final_assignment.repository.Repository.diamondGift
+import com.example.scorp_final_assignment.repository.Repository.giftImageDictionary
+import com.example.scorp_final_assignment.repository.Repository.heartGift
+import com.example.scorp_final_assignment.repository.Repository.spadeGift
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import io.agora.rtm.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
 class LiveChatFragment : Fragment() {
 
@@ -302,10 +306,25 @@ class LiveChatFragment : Fragment() {
             override fun onMemberCountUpdated(i: Int) {}
             override fun onAttributesUpdated(list: List<RtmChannelAttribute>) {}
             override fun onMessageReceived(message: RtmMessage, fromMember: RtmChannelMember) {
-                val text = message.text
-                val fromUser = fromMember.userId
-                val message_text = "Message received from $fromUser : $text\n"
-                writeToMessageHistory(message_text)
+                when(message.messageType){
+                    RtmMessageType.TEXT -> {
+                        val text = message.text
+                        val fromUser = fromMember.userId
+                        val message_text = "Message received from $fromUser : $text\n"
+                        writeToMessageHistory(message_text)
+                    }
+                    RtmMessageType.RAW -> {
+                        val sentGiftIV = binding.sentGiftIV
+                        lifecycleScope.launch(Dispatchers.Main){
+                            sentGiftIV.visibility = View.VISIBLE
+                            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+                            delay(3000L)
+                            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
+                            sentGiftIV.visibility = View.GONE
+                        }
+                    }
+                    else -> Log.d("Deneme", "EEEEEEEEE")
+                }
             }
 
             override fun onImageMessageReceived(
@@ -364,6 +383,7 @@ class LiveChatFragment : Fragment() {
         //val bytes: ByteArray = byteArrayOf(0x02)
         //val message = mRtmClient!!.createMessage(bytes)
 
+        //val message = mRtmClient!!.createMessage(clubGift)
         val message = mRtmClient!!.createMessage()
         message.text = message_content
         // Send message to channel
@@ -386,13 +406,36 @@ class LiveChatFragment : Fragment() {
         })
     }
 
+    // Button to send gift message
+    fun onClickSendGiftMsg(gift: ByteArray) {
+
+        val message = mRtmClient!!.createMessage(gift)
+
+        // Send message to channel
+        mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
+            override fun onSuccess(aVoid: Void?) {
+                val text = "Gift message is sent!"
+                writeToMessageHistory(text)
+
+                when(gift){
+                    clubGift -> Log.d("Deneme", "CLUB IS SENT")
+                    spadeGift -> Log.d("Deneme", "spade IS SENT")
+                    heartGift -> Log.d("Deneme", "heart IS SENT")
+                    diamondGift -> Log.d("Deneme", "Diamond IS SENT")
+                }
+            }
+
+            override fun onFailure(errorInfo: ErrorInfo) {
+                val text = "Gift Message Error:"
+                writeToMessageHistory(text)
+            }
+        })
+    }
+
     private fun writeToMessageHistory(record: String) {
         val currentMessages = messageAdapter.currentList.toMutableList()
         currentMessages.add(record)
         messageAdapter.submitList(currentMessages)
-        //messageAdapter.notifyDataSetChanged()
-
-        //binding.textRecyclerView.scrollToPosition(0)
     }
 
 
@@ -406,19 +449,45 @@ class LiveChatFragment : Fragment() {
 
         val clubIV = dialog.findViewById<TextView>(R.id.clubIV) as ImageView
         val spadeIV = dialog.findViewById<TextView>(R.id.spadeIV) as ImageView
-        val hearthIV = dialog.findViewById<TextView>(R.id.hearthIV) as ImageView
+        val heartIV = dialog.findViewById<TextView>(R.id.heartIV) as ImageView
         val diamongIV = dialog.findViewById<TextView>(R.id.diamondIV) as ImageView
 
         clubIV.setImageResource(R.drawable.club)
         spadeIV.setImageResource(R.drawable.spade)
-        hearthIV.setImageResource(R.drawable.hearth)
+        heartIV.setImageResource(R.drawable.heart)
         diamongIV.setImageResource(R.drawable.diamond)
 
-        //dialog.setTitle("Item Details")
-        //dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        //dialog.window?.setGravity(Gravity.BOTTOM)
+        val sentGiftIV = binding.sentGiftIV
+
+        clubIV.setOnClickListener{
+            onClickSendGiftMsg(clubGift)
+            sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
+            //binding.sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+
+            lifecycleScope.launch(Dispatchers.Main){
+                sentGiftIV.visibility = View.VISIBLE
+                sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+                delay(3000L)
+                sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
+                sentGiftIV.visibility = View.GONE
+            }
+
+
+
+        }
+
+        spadeIV.setOnClickListener{ onClickSendGiftMsg(spadeGift) }
+        diamongIV.setOnClickListener{ onClickSendGiftMsg(diamondGift) }
+        heartIV.setOnClickListener{ onClickSendGiftMsg(heartGift) }
+
+
         dialog.show()
+
     }
+
+
+
+
 
 
 
