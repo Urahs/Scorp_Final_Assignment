@@ -475,6 +475,10 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun sendGift(gift: Gift){
+
+        if(gift.isSended)
+            onClickSendGiftMsg(gift.giftByteArray)
+
         jobList.add(gift)
         if(!jobContinue)
             showGift()
@@ -487,11 +491,7 @@ class LiveChatFragment : Fragment() {
 
             val sentGiftIV = binding.sentGiftIV
             jobContinue = true
-
-            if(jobList[0].isSended)
-                onClickSendGiftMsg(jobList[0].giftByteArray)
-
-
+            
             sentGiftIV.setImageResource(jobList[0].giftImage!!)
             sentGiftIV.visibility = View.VISIBLE
 
