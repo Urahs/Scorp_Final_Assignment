@@ -6,19 +6,21 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scorp_final_assignment.databinding.ItemChatTextBinding
+import com.example.scorp_final_assignment.repository.Repository
+import com.example.scorp_final_assignment.repository.Repository.Message
 
 
-class TextDiffCallback(): DiffUtil.ItemCallback<String>() {
-    override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+class TextDiffCallback(): DiffUtil.ItemCallback<Message>() {
+    override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
         return oldItem == newItem
     }
 
-    override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+    override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
         return oldItem == newItem
     }
 }
 
-class MessageAdapter(): ListAdapter<String, MessageAdapter.MessageViewHolder>(TextDiffCallback()) {
+class MessageAdapter: ListAdapter<Message, MessageAdapter.MessageViewHolder>(TextDiffCallback()) {
 
     class MessageViewHolder(val binding: ItemChatTextBinding): RecyclerView.ViewHolder(binding.root) {}
 
@@ -29,6 +31,7 @@ class MessageAdapter(): ListAdapter<String, MessageAdapter.MessageViewHolder>(Te
 
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val messageTV = holder.binding.textView
-        messageTV.text = getItem(position)
+        val messageItem = getItem(position)
+        messageTV.text = "[${messageItem.time.hour}:${messageItem.time.minute}] ${messageItem.content}"
     }
 }

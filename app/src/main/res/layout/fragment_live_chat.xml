@@ -16,6 +16,7 @@
         android:layout_alignStart="@id/remote_video_view_container"
         android:onClick="joinChannel"
         android:text="Join"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -27,6 +28,7 @@
         android:layout_alignEnd="@id/remote_video_view_container"
         android:onClick="leaveChannel"
         android:text="Leave"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -38,11 +40,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/chatButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintBottom_toTopOf="@+id/textRecyclerView"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <FrameLayout
         android:id="@+id/remote_video_view_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/local_video_view_container"
         android:layout_centerHorizontal="true"
         android:background="@android:color/darker_gray"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -56,6 +65,7 @@
         android:id="@+id/local_video_view_container"
         android:layout_width="177dp"
         android:layout_height="226dp"
+        android:layout_below="@+id/remote_video_view_container"
         android:layout_centerHorizontal="true"
         android:background="#606060"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,17 +73,42 @@
 
     </FrameLayout>
 
-    <EditText
-        android:id="@+id/msg_box"
-        android:layout_width="198dp"
-        android:layout_height="57dp"
-        android:autofillHints=""
-        android:ems="10"
-        android:hint="message"
-        android:inputType="textPersonName"
-        android:singleLine="false"
-        app:layout_constraintBottom_toTopOf="@+id/textRecyclerView"
-        app:layout_constraintStart_toStartOf="@+id/remote_video_view_container" />
+    <LinearLayout
+        android:id="@+id/textArea"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/textField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="10"
+            android:hint="Say something...">
+
+        </EditText>
+
+        <TextView
+            android:id="@+id/sendTextMessageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:background="@color/black"
+            android:gravity="center"
+            android:text=">"
+            android:textColor="@color/white"
+            android:textSize="30sp" />
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/send_channel_msg_button"
@@ -88,10 +123,10 @@
         android:id="@+id/textRecyclerView"
         android:layout_width="400dp"
         android:layout_height="250dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="10dp"
         android:background="#66EF0B13"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@+id/JoinButton"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,5 +145,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="60dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

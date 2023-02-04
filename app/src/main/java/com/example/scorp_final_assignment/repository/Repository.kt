@@ -1,6 +1,7 @@
 package com.example.scorp_final_assignment.repository
 
 import com.example.scorp_final_assignment.R
+import java.time.LocalTime
 
 object Repository {
 
@@ -30,6 +31,11 @@ object Repository {
         val giftImage: Int?
     )
 
+
+    data class Message(
+        val content: String,
+        val time: LocalTime
+    )
 
 
 /*
