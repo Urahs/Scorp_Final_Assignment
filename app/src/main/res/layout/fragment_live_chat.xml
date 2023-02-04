@@ -14,10 +14,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/remote_video_view_container"
         android:layout_alignStart="@id/remote_video_view_container"
+        android:layout_marginBottom="5dp"
         android:onClick="joinChannel"
         android:text="Join"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/chatButton"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
@@ -26,27 +29,39 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/remote_video_view_container"
         android:layout_alignEnd="@id/remote_video_view_container"
+        android:layout_marginBottom="5dp"
         android:onClick="leaveChannel"
         android:text="Leave"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/giftButton" />
 
-    <Button
-        android:id="@+id/giftButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gift"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
+    <ImageView
         android:id="@+id/chatButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Button"
-        app:layout_constraintBottom_toTopOf="@+id/textRecyclerView"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="5dp"
+        android:elevation="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/giftButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/JoinButton"
+        tools:srcCompat="@drawable/chat_image" />
+
+    <ImageView
+        android:id="@+id/giftButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginBottom="5dp"
+        android:elevation="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/LeaveButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/chatButton"
+        tools:srcCompat="@drawable/gift_image" />
 
     <FrameLayout
         android:id="@+id/remote_video_view_container"
@@ -54,6 +69,7 @@
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:background="@android:color/darker_gray"
+        android:isScrollContainer="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,21 +126,13 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/send_channel_msg_button"
-        android:layout_width="126dp"
-        android:layout_height="45dp"
-        android:onClick="onClickSendChannelMsg"
-        android:text="send"
-        app:layout_constraintBottom_toTopOf="@+id/textRecyclerView"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/textRecyclerView"
         android:layout_width="400dp"
         android:layout_height="250dp"
+
         android:layout_marginBottom="10dp"
-        android:background="#66EF0B13"
+        android:background="@drawable/rounded_corners"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
@@ -138,8 +146,9 @@
         android:id="@+id/sentGiftIV"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_marginTop="50dp"
         android:elevation="10dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

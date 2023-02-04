@@ -1,100 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_bg"
+    android:rowCount="2"
+    android:columnCount="2"
     android:paddingLeft="10dp">
 
-    <ImageView
-        android:id="@+id/clubIV"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/club" />
-
-    <ImageView
-        android:id="@+id/diamondIV"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clubIV"
-        tools:srcCompat="@drawable/diamond" />
-
-    <ImageView
-        android:id="@+id/spadeIV"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/diamondIV"
-        tools:srcCompat="@drawable/spade" />
-
-    <ImageView
-        android:id="@+id/heartIV"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="20dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spadeIV"
-        tools:srcCompat="@drawable/heart" />
-
-    <TextView
-        android:id="@+id/clubTV"
+    <LinearLayout
+        android:id="@+id/clubLayout"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="30dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Club"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@+id/clubIV"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/clubIV"
-        app:layout_constraintTop_toTopOf="@+id/clubIV" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/diamondTV"
+        <ImageView
+            android:id="@+id/clubIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@drawable/club" />
+
+        <TextView
+            android:id="@+id/clubTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Club"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/clubIV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/clubIV"
+            app:layout_constraintTop_toTopOf="@+id/clubIV" />
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/heartLayout"
+        android:layout_marginStart="40dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Diamond"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@+id/diamondIV"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/clubIV"
-        app:layout_constraintTop_toTopOf="@+id/diamondIV" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/spadeTV"
+        <ImageView
+            android:id="@+id/heartIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spadeIV"
+            tools:srcCompat="@drawable/heart" />
+
+        <TextView
+            android:id="@+id/heartTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Heart"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/heartIV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/clubIV"
+            app:layout_constraintTop_toTopOf="@+id/heartIV" />
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/diamondLayout"
+        android:layout_marginStart="20dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Spade"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@+id/spadeIV"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/clubIV"
-        app:layout_constraintTop_toTopOf="@+id/spadeIV" />
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/diamondIV"
+            android:layout_width="50dp"
+            android:layout_marginEnd="20dp"
+            android:layout_height="50dp"
+            tools:srcCompat="@drawable/diamond" />
+
+        <TextView
+            android:id="@+id/diamondTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Diamond"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/clubIV"
+            app:layout_constraintTop_toTopOf="@+id/diamondIV" />
+
+    </LinearLayout>
 
 
-    <TextView
-        android:id="@+id/heartTV"
+    <LinearLayout
+        android:id="@+id/spadeLayout"
+        android:layout_marginStart="40dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Heart"
-        android:textColor="@color/black"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="@+id/heartIV"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/clubIV"
-        app:layout_constraintTop_toTopOf="@+id/heartIV" />
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/spadeIV"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/diamondIV"
+            tools:srcCompat="@drawable/spade" />
+
+        <TextView
+            android:id="@+id/spadeTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spade"
+            android:layout_gravity="center"
+            android:textColor="@color/black"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="@+id/spadeIV"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/clubIV"
+            app:layout_constraintTop_toTopOf="@+id/spadeIV" />
+
+    </LinearLayout>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+</GridLayout>

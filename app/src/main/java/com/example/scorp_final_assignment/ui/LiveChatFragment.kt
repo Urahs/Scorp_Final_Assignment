@@ -20,6 +20,7 @@ import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
@@ -124,10 +125,6 @@ class LiveChatFragment : Fragment() {
             leaveChannel()
         }
 
-        binding.sendChannelMsgButton.setOnClickListener{
-            onClickSendChannelMsg()
-        }
-
         binding.giftButton.setOnClickListener{
             showGiftMessages()
         }
@@ -140,12 +137,9 @@ class LiveChatFragment : Fragment() {
             onClickSendChannelMsg()
         }
 
+        binding.giftButton.setImageResource(R.drawable.gift_image)
+        binding.chatButton.setImageResource(R.drawable.chat_image)
 
-        /*
-        viewModel.nickName.observe(viewLifecycleOwner){
-            nickName = it
-        }
-        */
 
         val rootView = requireActivity().findViewById<View>(android.R.id.content)
         rootView.viewTreeObserver.addOnGlobalLayoutListener {
@@ -158,6 +152,8 @@ class LiveChatFragment : Fragment() {
                 binding.textArea.visibility = View.VISIBLE
                 binding.JoinButton.visibility = View.GONE
                 binding.LeaveButton.visibility = View.GONE
+                binding.chatButton.visibility = View.GONE
+                binding.giftButton.visibility = View.GONE
             }
             // Keyboard is hidden
             else {
@@ -165,6 +161,8 @@ class LiveChatFragment : Fragment() {
                 binding.textArea.visibility = View.GONE
                 binding.JoinButton.visibility = View.VISIBLE
                 binding.LeaveButton.visibility = View.VISIBLE
+                binding.chatButton.visibility = View.VISIBLE
+                binding.giftButton.visibility = View.VISIBLE
             }
         }
 
@@ -241,10 +239,10 @@ class LiveChatFragment : Fragment() {
 
     private fun setupLocalVideo() {
         val container = binding.localVideoViewContainer
-        // Create a SurfaceView object and add it as a child to the FrameLayout.
         localSurfaceView = SurfaceView(context)
         container.addView(localSurfaceView)
-        // Pass the SurfaceView object to Agora so that it renders the local video.
+        localSurfaceView!!.setZOrderMediaOverlay(true)
+
         agoraEngine!!.setupLocalVideo(
             VideoCanvas(
                 localSurfaceView,
@@ -389,16 +387,6 @@ class LiveChatFragment : Fragment() {
 
     private fun openMessageButtonClick() {
 
-        /*
-        binding.textArea.visibility = View.VISIBLE
-        binding.JoinButton.visibility = View.GONE
-        binding.LeaveButton.visibility = View.GONE
-
-         */
-
-        Log.d("Deneme", "BUTTON CLICKEDDD!!!")
-
-
         val textField = binding.textField
         textField.requestFocus()
         val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -407,11 +395,6 @@ class LiveChatFragment : Fragment() {
 
     // Button to send channel message
     fun onClickSendChannelMsg() {
-        /*
-        binding.textArea.visibility = View.GONE
-        binding.JoinButton.visibility = View.VISIBLE
-        binding.LeaveButton.visibility = View.VISIBLE
-         */
 
         val message = mRtmClient!!.createMessage()
         message.text = binding.textField.text.toString()
@@ -475,10 +458,10 @@ class LiveChatFragment : Fragment() {
         heartIV.setImageResource(R.drawable.heart)
         diamondIV.setImageResource(R.drawable.diamond)
 
-        clubIV.setOnClickListener{ sendGift(Gift(true, clubGift, R.drawable.club)) }
-        spadeIV.setOnClickListener{ sendGift(Gift(true, spadeGift, R.drawable.spade)) }
-        diamondIV.setOnClickListener{ sendGift(Gift(true, diamondGift, R.drawable.diamond)) }
-        heartIV.setOnClickListener{ sendGift(Gift(true, heartGift, R.drawable.heart)) }
+        dialog.findViewById<LinearLayout>(R.id.clubLayout)!!.setOnClickListener{ sendGift(Gift(true, clubGift, R.drawable.club)) }
+        dialog.findViewById<LinearLayout>(R.id.spadeLayout)!!.setOnClickListener{ sendGift(Gift(true, spadeGift, R.drawable.spade)) }
+        dialog.findViewById<LinearLayout>(R.id.diamondLayout)!!.setOnClickListener{ sendGift(Gift(true, diamondGift, R.drawable.diamond)) }
+        dialog.findViewById<LinearLayout>(R.id.heartLayout)!!.setOnClickListener{ sendGift(Gift(true, heartGift, R.drawable.heart)) }
 
         dialog.show()
     }
