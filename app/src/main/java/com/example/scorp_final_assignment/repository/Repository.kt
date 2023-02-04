@@ -17,12 +17,19 @@ object Repository {
     val spadeGift = byteArrayOf(0x04)
 
 
-    val giftImageDictionary = mapOf(
-        "club" to R.drawable.club,
-        "heart" to R.drawable.heart,
-        "spade" to R.drawable.spade,
-        "diamond" to R.drawable.diamond
+    val byteValueToImageDictionary = mapOf(
+        clubGift.contentToString() to R.drawable.club,
+        heartGift.contentToString() to R.drawable.heart,
+        spadeGift.contentToString() to R.drawable.spade,
+        diamondGift.contentToString() to R.drawable.diamond
     )
+
+    data class Gift(
+        val isSended: Boolean,
+        val giftByteArray: ByteArray,
+        val giftImage: Int?
+    )
+
 
 
 /*

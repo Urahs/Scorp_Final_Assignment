@@ -2,14 +2,12 @@ package com.example.scorp_final_assignment.ui
 
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -27,18 +25,19 @@ import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.adapters.TextAdapter
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
+import com.example.scorp_final_assignment.repository.Repository
 import com.example.scorp_final_assignment.repository.Repository.Token
+import com.example.scorp_final_assignment.repository.Repository.byteValueToImageDictionary
 import com.example.scorp_final_assignment.repository.Repository.clubGift
+import com.example.scorp_final_assignment.repository.Repository.Gift
 import com.example.scorp_final_assignment.repository.Repository.diamondGift
-import com.example.scorp_final_assignment.repository.Repository.giftImageDictionary
 import com.example.scorp_final_assignment.repository.Repository.heartGift
 import com.example.scorp_final_assignment.repository.Repository.spadeGift
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import io.agora.rtm.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.*
+
 
 class LiveChatFragment : Fragment() {
 
@@ -80,7 +79,7 @@ class LiveChatFragment : Fragment() {
     private var message_content: String? = null
 
 
-    private var jobList = mutableListOf<Boolean>()
+    private var jobList = mutableListOf<Repository.Gift>()
     private var jobContinue = false
 
     //endregion
@@ -164,10 +163,6 @@ class LiveChatFragment : Fragment() {
 
         loginTextChat()
         joinTextChat()
-
-        val x = binding.sentGiftIV
-        x.setImageResource(giftImageDictionary["club"]!!)
-        x.visibility = View.GONE
     }
 
     override fun onDestroyView() {
@@ -317,21 +312,6 @@ class LiveChatFragment : Fragment() {
         }
     }.flowOn(Dispatchers.Default)
 
-    val testFlow = flow<Boolean>{
-        val sentGiftIV = binding.sentGiftIV
-        lifecycleScope.launch(Dispatchers.Main){
-            sentGiftIV.visibility = View.VISIBLE
-            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
-            delay(3000L)
-            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
-            sentGiftIV.visibility = View.GONE
-            delay(1000L)
-            jobContinue = false
-            jobList.removeAt(0)
-            if(jobList.isNotEmpty())
-                showGift()
-        }
-    }
 
 
     // Button to join the <Vg k="MESS" /> channel
@@ -350,29 +330,21 @@ class LiveChatFragment : Fragment() {
                         writeToMessageHistory(message_text)
                     }
                     RtmMessageType.RAW -> {
-                        /*lifecycleScope.launch{
-                            testFlow.collect(){
 
-                            }
+                        val giftImage = byteValueToImageDictionary[message.rawMessage.contentToString()]
+                        var giftByteArray : ByteArray? = null
+
+                        when(message.rawMessage.contentToString()){
+                            clubGift.contentToString() -> giftByteArray = clubGift
+                            heartGift.contentToString() -> giftByteArray = heartGift
+                            diamondGift.contentToString() -> giftByteArray = diamondGift
+                            spadeGift.contentToString() -> giftByteArray = spadeGift
                         }
 
-                         */
-
-                        jobList.add(false)
-                        Log.d("Deneme", "In Receive Part >>> ${jobList}")
-                        if(!jobContinue){
-                            binding.sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-                            showGift()
-                        }
-
-
-                        Log.d("Deneme", "In Receive Part <<< ${jobList}")
-
-
-                        Log.d("Deneme", "AAAAAAAAAAAAAAAAAAA")
-
+                        sendGift(Gift(false, giftByteArray!!, giftImage))
                     }
-                    else -> Log.d("Deneme", "EEEEEEEEE")
+                    // TODO
+                    else -> Log.d("Deneme", "ERRRORRRR")
                 }
             }
 
@@ -440,12 +412,6 @@ class LiveChatFragment : Fragment() {
             override fun onSuccess(aVoid: Void?) {
                 val text = "${viewModel.nickName} : ${message.text}"
                 writeToMessageHistory(text)
-                /*
-                Log.d("Deneme", message.rawMessage.toString())
-                if(message.rawMessage.contentEquals(byteArrayOf(0x02))){
-                    Log.d("Deneme", "KUDURRRRRRRDUMMMMMM!!!!")
-                }
-                */
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
@@ -465,15 +431,6 @@ class LiveChatFragment : Fragment() {
             override fun onSuccess(aVoid: Void?) {
                 val text = "Gift message is sent!"
                 writeToMessageHistory(text)
-
-                /*
-                when(gift){
-                    clubGift -> Log.d("Deneme", "CLUB IS SENT")
-                    spadeGift -> Log.d("Deneme", "spade IS SENT")
-                    heartGift -> Log.d("Deneme", "heart IS SENT")
-                    diamondGift -> Log.d("Deneme", "Diamond IS SENT")
-                }
-                 */
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
@@ -501,87 +458,56 @@ class LiveChatFragment : Fragment() {
         val clubIV = dialog.findViewById<TextView>(R.id.clubIV) as ImageView
         val spadeIV = dialog.findViewById<TextView>(R.id.spadeIV) as ImageView
         val heartIV = dialog.findViewById<TextView>(R.id.heartIV) as ImageView
-        val diamongIV = dialog.findViewById<TextView>(R.id.diamondIV) as ImageView
+        val diamondIV = dialog.findViewById<TextView>(R.id.diamondIV) as ImageView
 
         clubIV.setImageResource(R.drawable.club)
         spadeIV.setImageResource(R.drawable.spade)
         heartIV.setImageResource(R.drawable.heart)
-        diamongIV.setImageResource(R.drawable.diamond)
+        diamondIV.setImageResource(R.drawable.diamond)
 
-        val sentGiftIV = binding.sentGiftIV
 
-        clubIV.setOnClickListener{
-            //onClickSendGiftMsg(clubGift)
-            //sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-
-            /*
-            lifecycleScope.launch(Dispatchers.Main){
-                sentGiftIV.visibility = View.VISIBLE
-                sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
-                delay(3000L)
-                sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
-                sentGiftIV.visibility = View.GONE
-            }
-             */
-
-/*
-            runBlocking {
-                onClickSendGiftMsg(clubGift)
-                sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-                testFlow.collect()
-            }
-*/
-
-            jobList.add(true)
-            if(!jobContinue)
-                showGift()
-
-            /*
-            channel.trySend(
-                lifecycleScope
-                    .launch(start = CoroutineStart.LAZY) {
-                    onClickSendGiftMsg(clubGift)
-                    sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-                    testFlow.collect()
-                }
-            )
-*/
-
-        }
-
-        spadeIV.setOnClickListener{ onClickSendGiftMsg(spadeGift) }
-        diamongIV.setOnClickListener{ onClickSendGiftMsg(diamondGift) }
-        heartIV.setOnClickListener{ onClickSendGiftMsg(heartGift) }
-
+        clubIV.setOnClickListener{ sendGift(Gift(true, clubGift, R.drawable.club)) }
+        spadeIV.setOnClickListener{ sendGift(Gift(true, spadeGift, R.drawable.spade)) }
+        diamondIV.setOnClickListener{ sendGift(Gift(true, diamondGift, R.drawable.diamond)) }
+        heartIV.setOnClickListener{ sendGift(Gift(true, heartGift, R.drawable.heart)) }
 
         dialog.show()
-
     }
 
+    private fun sendGift(gift: Gift){
+        jobList.add(gift)
+        if(!jobContinue)
+            showGift()
+    }
 
 
     private fun showGift(){
 
         lifecycleScope.launch(Dispatchers.Main){
-            jobContinue = true
-            if(jobList[0])
-                onClickSendGiftMsg(clubGift)
+
             val sentGiftIV = binding.sentGiftIV
-            sentGiftIV.setImageResource(R.drawable.club)
+            jobContinue = true
+
+            if(jobList[0].isSended)
+                onClickSendGiftMsg(jobList[0].giftByteArray)
+
+
+            sentGiftIV.setImageResource(jobList[0].giftImage!!)
             sentGiftIV.visibility = View.VISIBLE
+
+            //animation
             sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
             delay(3000L)
             sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
             sentGiftIV.visibility = View.GONE
             delay(1000L)
+
             jobList.removeAt(0)
             jobContinue = false
             if(jobList.isNotEmpty())
                 showGift()
         }
     }
-
-
 
     //endregion
 }
