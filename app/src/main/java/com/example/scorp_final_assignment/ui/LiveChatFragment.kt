@@ -19,7 +19,6 @@ import com.example.scorp_final_assignment.repository.Repository.AppID
 import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
-import kotlinx.coroutines.launch
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
@@ -36,8 +35,10 @@ import com.example.scorp_final_assignment.repository.Repository.heartGift
 import com.example.scorp_final_assignment.repository.Repository.spadeGift
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import io.agora.rtm.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.*
 
 class LiveChatFragment : Fragment() {
 
@@ -78,7 +79,10 @@ class LiveChatFragment : Fragment() {
     // Message content
     private var message_content: String? = null
 
-    //private var nickName: String = "behzat c"
+
+    private var jobList = mutableListOf<String>()
+    private var jobContinue = false
+
     //endregion
 
 
@@ -297,6 +301,34 @@ class LiveChatFragment : Fragment() {
         })
     }
 
+    fun flowFnc(): Flow<Boolean> = flow{
+        val sentGiftIV = binding.sentGiftIV
+        lifecycleScope.launch(Dispatchers.Main){
+            sentGiftIV.visibility = View.VISIBLE
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+            delay(3000L)
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
+            sentGiftIV.visibility = View.GONE
+            emit(true)
+        }
+    }.flowOn(Dispatchers.Default)
+
+    val testFlow = flow<Boolean>{
+        val sentGiftIV = binding.sentGiftIV
+        lifecycleScope.launch(Dispatchers.Main){
+            sentGiftIV.visibility = View.VISIBLE
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+            delay(3000L)
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
+            sentGiftIV.visibility = View.GONE
+            delay(1000L)
+            jobContinue = false
+            jobList.removeAt(0)
+            if(jobList.isNotEmpty())
+                showGift()
+        }
+    }
+
 
     // Button to join the <Vg k="MESS" /> channel
     fun joinTextChat() {
@@ -314,13 +346,17 @@ class LiveChatFragment : Fragment() {
                         writeToMessageHistory(message_text)
                     }
                     RtmMessageType.RAW -> {
-                        val sentGiftIV = binding.sentGiftIV
-                        lifecycleScope.launch(Dispatchers.Main){
-                            sentGiftIV.visibility = View.VISIBLE
-                            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
-                            delay(3000L)
-                            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
-                            sentGiftIV.visibility = View.GONE
+                        /*lifecycleScope.launch{
+                            testFlow.collect(){
+
+                            }
+                        }
+
+                         */
+                        runBlocking {
+                            launch {
+                                testFlow.buffer(capacity = 5).collect()
+                            }
                         }
                     }
                     else -> Log.d("Deneme", "EEEEEEEEE")
@@ -443,7 +479,7 @@ class LiveChatFragment : Fragment() {
     private fun showGiftMessages() {
 
         val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_gift_message)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
@@ -460,10 +496,10 @@ class LiveChatFragment : Fragment() {
         val sentGiftIV = binding.sentGiftIV
 
         clubIV.setOnClickListener{
-            onClickSendGiftMsg(clubGift)
-            sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-            //binding.sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+            //onClickSendGiftMsg(clubGift)
+            //sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
 
+            /*
             lifecycleScope.launch(Dispatchers.Main){
                 sentGiftIV.visibility = View.VISIBLE
                 sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
@@ -471,8 +507,33 @@ class LiveChatFragment : Fragment() {
                 sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
                 sentGiftIV.visibility = View.GONE
             }
+             */
+
+/*
+            runBlocking {
+                onClickSendGiftMsg(clubGift)
+                sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
+                testFlow.collect()
+            }
+*/
+
+            jobList.add("1")
+            if(!jobContinue)
+                showGift()
 
 
+
+
+            /*
+            channel.trySend(
+                lifecycleScope
+                    .launch(start = CoroutineStart.LAZY) {
+                    onClickSendGiftMsg(clubGift)
+                    sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
+                    testFlow.collect()
+                }
+            )
+*/
 
         }
 
@@ -488,7 +549,14 @@ class LiveChatFragment : Fragment() {
 
 
 
-
+    private fun showGift(){
+        jobContinue = true
+        onClickSendGiftMsg(clubGift)
+        binding.sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
+        lifecycleScope.launch{
+            testFlow.collect()
+        }
+    }
 
 
 

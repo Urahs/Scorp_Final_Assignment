@@ -67,7 +67,7 @@ class HomeFragment : Fragment() {
 
     private fun handleNickName() {
         val nickNameTextField = binding.nickNameTV
-        binding.progressButton.isEnabled = false
+        //binding.progressButton.isEnabled = false
         nickNameTextField.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
