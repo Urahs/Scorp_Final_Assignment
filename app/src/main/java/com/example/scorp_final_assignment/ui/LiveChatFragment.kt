@@ -80,7 +80,7 @@ class LiveChatFragment : Fragment() {
     private var message_content: String? = null
 
 
-    private var jobList = mutableListOf<String>()
+    private var jobList = mutableListOf<Boolean>()
     private var jobContinue = false
 
     //endregion
@@ -164,6 +164,10 @@ class LiveChatFragment : Fragment() {
 
         loginTextChat()
         joinTextChat()
+
+        val x = binding.sentGiftIV
+        x.setImageResource(giftImageDictionary["club"]!!)
+        x.visibility = View.GONE
     }
 
     override fun onDestroyView() {
@@ -353,11 +357,20 @@ class LiveChatFragment : Fragment() {
                         }
 
                          */
-                        runBlocking {
-                            launch {
-                                testFlow.buffer(capacity = 5).collect()
-                            }
+
+                        jobList.add(false)
+                        Log.d("Deneme", "In Receive Part >>> ${jobList}")
+                        if(!jobContinue){
+                            binding.sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
+                            showGift()
                         }
+
+
+                        Log.d("Deneme", "In Receive Part <<< ${jobList}")
+
+
+                        Log.d("Deneme", "AAAAAAAAAAAAAAAAAAA")
+
                     }
                     else -> Log.d("Deneme", "EEEEEEEEE")
                 }
@@ -453,12 +466,14 @@ class LiveChatFragment : Fragment() {
                 val text = "Gift message is sent!"
                 writeToMessageHistory(text)
 
+                /*
                 when(gift){
                     clubGift -> Log.d("Deneme", "CLUB IS SENT")
                     spadeGift -> Log.d("Deneme", "spade IS SENT")
                     heartGift -> Log.d("Deneme", "heart IS SENT")
                     diamondGift -> Log.d("Deneme", "Diamond IS SENT")
                 }
+                 */
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
@@ -517,12 +532,9 @@ class LiveChatFragment : Fragment() {
             }
 */
 
-            jobList.add("1")
+            jobList.add(true)
             if(!jobContinue)
                 showGift()
-
-
-
 
             /*
             channel.trySend(
@@ -548,26 +560,26 @@ class LiveChatFragment : Fragment() {
 
 
 
-
     private fun showGift(){
-        jobContinue = true
-        onClickSendGiftMsg(clubGift)
-        binding.sentGiftIV.setImageResource(giftImageDictionary["club"]!!)
-        lifecycleScope.launch{
-            testFlow.collect()
+
+        lifecycleScope.launch(Dispatchers.Main){
+            jobContinue = true
+            if(jobList[0])
+                onClickSendGiftMsg(clubGift)
+            val sentGiftIV = binding.sentGiftIV
+            sentGiftIV.setImageResource(R.drawable.club)
+            sentGiftIV.visibility = View.VISIBLE
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_in))
+            delay(3000L)
+            sentGiftIV.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.zoom_out))
+            sentGiftIV.visibility = View.GONE
+            delay(1000L)
+            jobList.removeAt(0)
+            jobContinue = false
+            if(jobList.isNotEmpty())
+                showGift()
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

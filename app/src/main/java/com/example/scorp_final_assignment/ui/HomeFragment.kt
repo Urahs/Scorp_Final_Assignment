@@ -1,32 +1,25 @@
 package com.example.scorp_final_assignment.ui
 
 import android.Manifest
-import android.app.AlertDialog
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentHomeBinding
 import com.example.scorp_final_assignment.repository.Repository.MinNickNameLength
-import dagger.hilt.android.AndroidEntryPoint
 
 class HomeFragment : Fragment() {
 
@@ -102,7 +95,7 @@ class HomeFragment : Fragment() {
         }
         else{
             val dialog = Dialog(requireContext())
-            dialog.setContentView(R.layout.custom_permission_dialog)
+            dialog.setContentView(R.layout.dialog_custom_permission)
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             errorMessage += "\nYou may want to go \"Settings > Apps\" and allow the required permissions"
             dialog.findViewById<TextView>(R.id.messageTV).text = errorMessage
