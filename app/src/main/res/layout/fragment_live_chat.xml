@@ -83,7 +83,8 @@
         android:layout_height="226dp"
         android:layout_below="@+id/remote_video_view_container"
         android:layout_centerHorizontal="true"
-        android:background="#606060"
+        android:background="@android:color/darker_gray"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 

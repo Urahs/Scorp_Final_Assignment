@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
@@ -22,7 +21,9 @@ import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
@@ -37,7 +38,6 @@ import com.example.scorp_final_assignment.repository.Repository.spadeGift
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import io.agora.rtm.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 import java.time.LocalTime
 
 
@@ -49,6 +49,8 @@ class LiveChatFragment : Fragment() {
     private val binding get() = _binding!!
 
     var messageAdapter = MessageAdapter()
+    var connectedVideoChannel = false
+    var connectedTextChannel = false
 
     //region video chat variables
     private var localSurfaceView: SurfaceView? = null
@@ -73,52 +75,16 @@ class LiveChatFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
-
         binding.textRecyclerView.adapter = messageAdapter
-
-        setupVideoSDKEngine()
-
-        try {
-            mRtmClient = RtmClient.createInstance(requireContext(), AppID, object : RtmClientListener {
-                override fun onConnectionStateChanged(state: Int, reason: Int) {
-                    val text = "Connection state changed to $state Reason: $reason\n"
-                    writeToMessageHistory(text)
-                }
-
-                override fun onImageMessageReceivedFromPeer(rtmImageMessage: RtmImageMessage, s: String) {
-                }
-
-                override fun onFileMessageReceivedFromPeer(rtmFileMessage: RtmFileMessage, s: String) {
-                }
-
-                override fun onMediaUploadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {
-                }
-
-                override fun onMediaDownloadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {
-                }
-
-                override fun onTokenExpired() {
-                }
-
-                override fun onPeersOnlineStatusChanged(map: Map<String, Int>) {
-                }
-
-                override fun onMessageReceived(rtmMessage: RtmMessage, peerId: String) {
-                }
-            })
-        } catch (e: Exception) {
-            throw RuntimeException("initialization failed!")
-        }
-
-
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.JoinButton.setOnClickListener {
-            joinChannel()
+            connectChannels()
         }
 
         binding.LeaveButton.setOnClickListener {
@@ -147,8 +113,6 @@ class LiveChatFragment : Fragment() {
 
             // Keyboard is shown
             if (heightDiff > dpToPx(requireActivity(), 200f)) {
-                Log.d("Deneme", "KEYBOARD OPENED")
-
                 binding.textArea.visibility = View.VISIBLE
                 binding.JoinButton.visibility = View.GONE
                 binding.LeaveButton.visibility = View.GONE
@@ -157,7 +121,6 @@ class LiveChatFragment : Fragment() {
             }
             // Keyboard is hidden
             else {
-                Log.d("Deneme", "KEYBOARD CLOSED")
                 binding.textArea.visibility = View.GONE
                 binding.JoinButton.visibility = View.VISIBLE
                 binding.LeaveButton.visibility = View.VISIBLE
@@ -167,8 +130,6 @@ class LiveChatFragment : Fragment() {
         }
 
 
-        loginTextChat()
-        joinTextChat()
     }
 
     fun dpToPx(context: Context, dp: Float): Int {
@@ -177,12 +138,54 @@ class LiveChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        mRtmChannel!!.leave(null)
+        mRtmClient!!.logout(null)
         _binding = null
     }
     //endregion
 
 
+    private fun connectChannels(){
+        if(!connectedVideoChannel){
+            connectedVideoChannel = true
+            setupVideoSDKEngine()
+            joinVideoChannel()
+        }
+
+        if(!connectedTextChannel){
+            connectedTextChannel = true
+            rtmConnection()
+            loginTextChat()
+            joinTextChat()
+        }
+
+        if(!connectedVideoChannel)
+            showToastMessage("Couldn't connect to the video channel!")
+
+        if(!connectedTextChannel)
+            showToastMessage("Couldn't connect to the text channel!")
+    }
+
+
     //region video chat section
+
+    private fun rtmConnection() {
+        try {
+            mRtmClient = RtmClient.createInstance(requireContext(), AppID, object : RtmClientListener {
+                override fun onConnectionStateChanged(state: Int, reason: Int) {}
+                override fun onImageMessageReceivedFromPeer(rtmImageMessage: RtmImageMessage, s: String) {}
+                override fun onFileMessageReceivedFromPeer(rtmFileMessage: RtmFileMessage, s: String) {}
+                override fun onMediaUploadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {}
+                override fun onMediaDownloadingProgress(rtmMediaOperationProgress: RtmMediaOperationProgress, l: Long) {}
+                override fun onTokenExpired() {}
+                override fun onPeersOnlineStatusChanged(map: Map<String, Int>) {}
+                override fun onMessageReceived(rtmMessage: RtmMessage, peerId: String) {}
+            })
+        } catch (e: Exception) {
+            connectedTextChannel = false
+        }
+    }
+
     private fun setupVideoSDKEngine() {
         try {
             val config = RtcEngineConfig()
@@ -192,15 +195,15 @@ class LiveChatFragment : Fragment() {
             agoraEngine = RtcEngine.create(config)
             // By default, the video module is disabled, call enableVideo to enable it.
             agoraEngine!!.enableVideo()
-        } catch (e: Exception) {
-            showMessage(e.toString())
+        } catch (_: Exception) {
+            connectedVideoChannel = false
         }
     }
 
     private val mRtcEventHandler: IRtcEngineEventHandler = object : IRtcEngineEventHandler() {
         // Listen for the remote host joining the channel to get the uid of the host.
         override fun onUserJoined(uid: Int, elapsed: Int) {
-            showMessage("Remote user joined $uid")
+            showToastMessage("Remote user joined")
 
             // Set the remote video view
             activity!!.runOnUiThread {
@@ -210,11 +213,10 @@ class LiveChatFragment : Fragment() {
 
         override fun onJoinChannelSuccess(channel: String, uid: Int, elapsed: Int) {
             isJoined = true
-            showMessage("Joined Channel $channel")
         }
 
         override fun onUserOffline(uid: Int, reason: Int) {
-            showMessage("Remote user offline $uid $reason")
+            showToastMessage("Remote user offline")
 
             activity!!.runOnUiThread {
                 remoteSurfaceView!!.visibility = View.GONE
@@ -252,29 +254,33 @@ class LiveChatFragment : Fragment() {
         )
     }
 
-    fun joinChannel() {
-        val options = ChannelMediaOptions()
+    fun joinVideoChannel() {
+        try{
+            val options = ChannelMediaOptions()
 
-        // For a Video call, set the channel profile as COMMUNICATION.
-        options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION
-        // Set the client role as BROADCASTER or AUDIENCE according to the scenario.
-        options.clientRoleType = Constants.CLIENT_ROLE_BROADCASTER
-        // Display LocalSurfaceView.
-        setupLocalVideo()
-        localSurfaceView!!.visibility = View.VISIBLE
-        // Start local preview.
-        agoraEngine!!.startPreview()
-        // Join the channel with a temp token.
-        // You need to specify the user ID yourself, and ensure that it is unique in the channel.
-        agoraEngine!!.joinChannel(null, ChannelID, uid, options)
+            // For a Video call, set the channel profile as COMMUNICATION.
+            options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION
+            // Set the client role as BROADCASTER or AUDIENCE according to the scenario.
+            options.clientRoleType = Constants.CLIENT_ROLE_BROADCASTER
+            // Display LocalSurfaceView.
+            setupLocalVideo()
+            localSurfaceView!!.visibility = View.VISIBLE
+            // Start local preview.
+            agoraEngine!!.startPreview()
+            // Join the channel with a temp token.
+            // You need to specify the user ID yourself, and ensure that it is unique in the channel.
+            agoraEngine!!.joinChannel(null, ChannelID, uid, options)
+        } catch(_: Exception){
+            connectedVideoChannel = false
+        }
     }
 
     fun leaveChannel() {
         if (!isJoined) {
-            showMessage("Join a channel first")
+            showToastMessage("Join the channel first")
         } else {
             agoraEngine!!.leaveChannel()
-            showMessage("You left the channel")
+            showToastMessage("You left the channel")
             // Stop remote video rendering.
             if (remoteSurfaceView != null) remoteSurfaceView!!.visibility = View.GONE
             // Stop local video rendering.
@@ -283,7 +289,7 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-    fun showMessage(message: String?) {
+    fun showToastMessage(message: String?) {
         lifecycleScope.launch{
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
@@ -293,36 +299,34 @@ class LiveChatFragment : Fragment() {
 
     //region text chat section
 
-    // Button to login to Signaling
     fun loginTextChat() {
         // Log in to Signaling
-        mRtmClient!!.login(Token, viewModel.nickName, object : ResultCallback<Void?> {
-            override fun onSuccess(responseInfo: Void?) {}
-            override fun onFailure(errorInfo: ErrorInfo) {
-                val text: CharSequence = "User: $uid failed to log in to Signaling!$errorInfo"
-                val duration = Toast.LENGTH_SHORT
-                activity!!.runOnUiThread {
-                    val toast = Toast.makeText(context, text, duration)
-                    toast.show()
+        try {
+            mRtmClient!!.login(Token, viewModel.nickName, object : ResultCallback<Void?> {
+                override fun onSuccess(responseInfo: Void?) {}
+                override fun onFailure(errorInfo: ErrorInfo) {
+                    connectedTextChannel = false
                 }
-            }
-        })
+            })
+        } catch (_:Exception){
+            connectedTextChannel = false
+        }
     }
 
-    // Button to join the <Vg k="MESS" /> channel
+
     fun joinTextChat() {
-        //channel_name = et_channel_name!!.getText().toString()
         // Create a channel listener
         val mRtmChannelListener: RtmChannelListener = object : RtmChannelListener {
             override fun onMemberCountUpdated(i: Int) {}
             override fun onAttributesUpdated(list: List<RtmChannelAttribute>) {}
             override fun onMessageReceived(message: RtmMessage, fromMember: RtmChannelMember) {
                 when(message.messageType){
+
                     RtmMessageType.TEXT -> {
                         val text = message.text
                         val fromUser = fromMember.userId
-                        val message_text = "$fromUser : $text\n"
-                        writeToMessageHistory(message_text)
+                        val messageText = "$fromUser : $text"
+                        writeToMessageHistory(messageText)
                     }
                     RtmMessageType.RAW -> {
 
@@ -359,30 +363,19 @@ class LiveChatFragment : Fragment() {
         try {
             mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
         } catch (e: RuntimeException) {
+            connectedTextChannel = false
         }
         // Join the <Vg k="MESS" /> channel
-        mRtmChannel!!.join(object : ResultCallback<Void?> {
-            override fun onSuccess(responseInfo: Void?) {}
-            override fun onFailure(errorInfo: ErrorInfo) {
-                //val text: CharSequence = "User: $uid failed to join the channel!$errorInfo"
-                val text: CharSequence = "$errorInfo"
-                val duration = Toast.LENGTH_SHORT
-                activity!!.runOnUiThread {
-                    val toast = Toast.makeText(context, text, duration)
-                    toast.show()
+        try{
+            mRtmChannel!!.join(object : ResultCallback<Void?> {
+                override fun onSuccess(responseInfo: Void?) {}
+                override fun onFailure(errorInfo: ErrorInfo) {
+                    connectedTextChannel = false
                 }
-            }
-        })
-    }
-
-    // Button to log out of Signaling
-    fun onClickLogout(v: View?) {
-        mRtmClient!!.logout(null)
-    }
-
-    // Button to leave the channel
-    fun onClickLeave(v: View?) {
-        mRtmChannel!!.leave(null)
+            })
+        } catch (_ : Exception){
+            connectedTextChannel = false
+        }
     }
 
     private fun openMessageButtonClick() {
@@ -426,7 +419,7 @@ class LiveChatFragment : Fragment() {
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
-                val text = "Gift Message Error:"
+                val text = "Gift message couldn't sent"
                 writeToMessageHistory(text)
             }
         })

@@ -14,13 +14,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentHomeBinding
 import com.example.scorp_final_assignment.repository.Repository.MinNickNameLength
+import kotlinx.coroutines.launch
 import java.time.LocalTime
 
 class HomeFragment : Fragment() {
@@ -62,7 +66,7 @@ class HomeFragment : Fragment() {
 
     private fun handleNickName() {
         val nickNameTextField = binding.nickNameTV
-        //binding.progressButton.isEnabled = false
+        binding.progressButton.isEnabled = false
         nickNameTextField.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
