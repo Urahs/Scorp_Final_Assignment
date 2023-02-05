@@ -49,7 +49,7 @@
         app:layout_constraintEnd_toStartOf="@+id/giftButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/JoinButton"
-        tools:srcCompat="@drawable/chat_image" />
+        android:src="@drawable/chat_image" />
 
     <ImageView
         android:id="@+id/giftButton"
@@ -61,7 +61,7 @@
         app:layout_constraintEnd_toStartOf="@+id/LeaveButton"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/chatButton"
-        tools:srcCompat="@drawable/gift_image" />
+        android:src="@drawable/gift_image" />
 
     <FrameLayout
         android:id="@+id/remote_video_view_container"
@@ -70,7 +70,6 @@
         android:layout_centerHorizontal="true"
         android:background="@android:color/darker_gray"
         android:isScrollContainer="false"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -165,30 +164,39 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_end="60dp" />
 
-    <ImageView
-        android:id="@+id/connectionLostIV"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginBottom="60dp"
+    <LinearLayout
+        android:id="@+id/connectionLostLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@id/textRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/ic_connection_error" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/connectionLostTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-black"
-        android:text="@string/connection_error"
-        android:textColor="@color/black"
-        android:textSize="35sp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="@id/connectionLostIV"
-        app:layout_constraintStart_toStartOf="@id/connectionLostIV"
-        app:layout_constraintTop_toBottomOf="@id/connectionLostIV" />
+        <ImageView
+            android:id="@+id/connectionLostIV"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/ic_connection_error" />
+
+
+        <TextView
+            android:id="@+id/connectionLostTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-black"
+            android:text="@string/connection_error"
+            android:textColor="@color/black"
+            android:textSize="35sp" />
+
+    </LinearLayout>
+
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

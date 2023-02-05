@@ -2,11 +2,15 @@ package com.example.scorp_final_assignment.ui
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
+import android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -20,6 +24,10 @@ import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat.setWindowInsetsAnimationCallback
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
@@ -80,47 +88,42 @@ class LiveChatFragment : Fragment() {
         binding.textRecyclerView.adapter = messageAdapter
 
         internetConnection()
-
-
-        //connect text channel
-        rtmConnection()
-        loginTextChat()
-        joinTextChat()
-
-        binding.giftButton.setImageResource(R.drawable.gift_image)
-        binding.chatButton.setImageResource(R.drawable.chat_image)
-        binding.connectionLostIV.setImageResource(R.drawable.ic_connection_error)
+        connecToTextChannel()
 
         return binding.root
     }
 
-    private fun internetConnection() {
-        connectivityObserver = NetworkConnectivity(requireContext())
 
+    private fun connecToTextChannel() {
+        rtmConnection()
+        loginTextChat()
+        joinTextChat()
+    }
+
+    private fun internetConnection() {
+
+        fun noConnection(){
+            exitChannel()
+            internetAvailable = false
+            binding.connectionLostLayout.visibility = View.VISIBLE
+        }
+
+        connectivityObserver = NetworkConnectivity(requireContext())
         lifecycleScope.launch{
             connectivityObserver.observe().collect{ isConnectedToInternet->
 
                 if(isConnectedToInternet){
                     internetAvailable = true
-                    binding.connectionLostIV.visibility = View.GONE
-                    binding.connectionLostTV.visibility = View.GONE
+                    binding.connectionLostLayout.visibility = View.GONE
                 }
-                else {
-                    exitChannel()
-                    internetAvailable = false
-                    binding.connectionLostIV.visibility = View.VISIBLE
-                    binding.connectionLostTV.visibility = View.VISIBLE
-                }
+                else
+                    noConnection()
             }
         }
 
         // first check when open the page
         if(!checkForInternet(requireContext())){
-            // Internet connection is not available
-            exitChannel()
-            internetAvailable = false
-            binding.connectionLostIV.visibility = View.VISIBLE
-            binding.connectionLostTV.visibility = View.VISIBLE
+            noConnection()
         }
     }
 
@@ -207,8 +210,7 @@ class LiveChatFragment : Fragment() {
 
         if(!isJoinedTextChannel){
             isJoinedTextChannel = true
-            loginTextChat()
-            joinTextChat()
+            connecToTextChannel()
         }
 
         if(!isJoinedVideoChannel)
@@ -526,19 +528,8 @@ class LiveChatFragment : Fragment() {
         }
 
         val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
-        //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_gift_message)
         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-        val clubIV = dialog.findViewById<TextView>(R.id.clubIV) as ImageView
-        val spadeIV = dialog.findViewById<TextView>(R.id.spadeIV) as ImageView
-        val heartIV = dialog.findViewById<TextView>(R.id.heartIV) as ImageView
-        val diamondIV = dialog.findViewById<TextView>(R.id.diamondIV) as ImageView
-
-        clubIV.setImageResource(R.drawable.club)
-        spadeIV.setImageResource(R.drawable.spade)
-        heartIV.setImageResource(R.drawable.heart)
-        diamondIV.setImageResource(R.drawable.diamond)
 
         dialog.findViewById<LinearLayout>(R.id.clubLayout)!!.setOnClickListener{ sendGift(Gift(true, clubGift, R.drawable.club)) }
         dialog.findViewById<LinearLayout>(R.id.spadeLayout)!!.setOnClickListener{ sendGift(Gift(true, spadeGift, R.drawable.spade)) }

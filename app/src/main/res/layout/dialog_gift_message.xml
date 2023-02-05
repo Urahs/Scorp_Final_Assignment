@@ -24,7 +24,7 @@
             android:layout_marginEnd="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/club" />
+            android:src="@drawable/club" />
 
         <TextView
             android:id="@+id/clubTV"
@@ -56,7 +56,7 @@
             android:layout_marginEnd="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/spadeIV"
-            tools:srcCompat="@drawable/heart" />
+            android:src="@drawable/heart" />
 
         <TextView
             android:id="@+id/heartTV"
@@ -87,7 +87,7 @@
             android:layout_width="50dp"
             android:layout_marginEnd="20dp"
             android:layout_height="50dp"
-            tools:srcCompat="@drawable/diamond" />
+            android:src="@drawable/diamond" />
 
         <TextView
             android:id="@+id/diamondTV"
@@ -117,7 +117,7 @@
             android:layout_marginEnd="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/diamondIV"
-            tools:srcCompat="@drawable/spade" />
+            android:src="@drawable/spade" />
 
         <TextView
             android:id="@+id/spadeTV"
