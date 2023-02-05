@@ -10,7 +10,7 @@ object Repository {
     const val AppID = "09155caed6e0491482a59dd13ea8e8e2"
     val Token = null
     //const val ChannelID = "a44c58de-311b-4033-b70f-1570406c156c"
-    const val ChannelID = "a44c58de-311b-4033-b70f-1570406c156a"
+    const val ChannelID = "a44c58de-311b-4033-a70f-1570406c156a"
 
     val clubGift = byteArrayOf(0x01)
     val heartGift = byteArrayOf(0x02)

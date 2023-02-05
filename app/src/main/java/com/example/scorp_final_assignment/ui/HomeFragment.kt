@@ -16,6 +16,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -63,19 +64,26 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    fun isEnglishAlphabet(text: String): Boolean {
+        val pattern = Regex("^[a-zA-Z]+$")
+        return pattern.matches(text)
+    }
+
 
     private fun handleNickName() {
         val nickNameTextField = binding.nickNameTV
         binding.progressButton.isEnabled = false
-        nickNameTextField.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        nickNameTextField.doOnTextChanged{ text, start, before, count ->
+            var errorMessage = ""
+            if (text!!.length < MinNickNameLength)
+                errorMessage += "Nickname should be more than 4 characters!\n"
+            if(!isEnglishAlphabet(text.toString()))
+                errorMessage += "Nickname should be consist of english alphabet!"
 
-            override fun afterTextChanged(currentText: Editable?) {
-                binding.progressButton.isEnabled = currentText.toString() != "" && currentText.toString().length >= MinNickNameLength
-            }
-        })
+            binding.tilName.error = errorMessage
+            binding.progressButton.isEnabled = text.length >= MinNickNameLength && isEnglishAlphabet(text.toString())
+        }
     }
 
     private fun progressButtonClicked(){

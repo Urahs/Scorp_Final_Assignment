@@ -32,6 +32,14 @@ class MessageAdapter: ListAdapter<Message, MessageAdapter.MessageViewHolder>(Tex
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val messageTV = holder.binding.textView
         val messageItem = getItem(position)
-        messageTV.text = "[${messageItem.time.hour}:${messageItem.time.minute}] ${messageItem.content}"
+        val hour = messageItem.time.hour
+        messageTV.text = "[${organiseTheTime(messageItem.time.hour)}:${organiseTheTime(messageItem.time.minute)}] ${messageItem.content}"
     }
+}
+
+fun organiseTheTime(time: Int) : String{
+    if (time<10)
+        return "0$time"
+    else
+        return time.toString()
 }

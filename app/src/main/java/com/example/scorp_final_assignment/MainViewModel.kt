@@ -1,6 +1,12 @@
 package com.example.scorp_final_assignment
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import androidx.lifecycle.ViewModel
+
 
 /*
 @HiltViewModel
@@ -21,4 +27,8 @@ class MainViewModel(): ViewModel() {
     fun changeNickName(value: String){
         nickName = value
     }
+
+
+
+
 }

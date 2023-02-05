@@ -1,8 +1,12 @@
 package com.example.scorp_final_assignment.ui
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.SurfaceView
@@ -21,9 +25,7 @@ import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
@@ -49,15 +51,14 @@ class LiveChatFragment : Fragment() {
     private val binding get() = _binding!!
 
     var messageAdapter = MessageAdapter()
-    var connectedVideoChannel = false
-    var connectedTextChannel = false
+    var isJoinedVideoChannel = false
+    var isJoinedTextChannel = false
 
     //region video chat variables
     private var localSurfaceView: SurfaceView? = null
     private var remoteSurfaceView: SurfaceView? = null
     private var agoraEngine: RtcEngine? = null
     private val uid = 0
-    private var isJoined = false
     //endregion
 
     //region message chat variables
@@ -76,6 +77,9 @@ class LiveChatFragment : Fragment() {
         // Inflate the layout for this fragment
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
         binding.textRecyclerView.adapter = messageAdapter
+
+        rtmConnection()
+
         return binding.root
     }
 
@@ -128,8 +132,6 @@ class LiveChatFragment : Fragment() {
                 binding.giftButton.visibility = View.VISIBLE
             }
         }
-
-
     }
 
     fun dpToPx(context: Context, dp: Float): Int {
@@ -146,26 +148,24 @@ class LiveChatFragment : Fragment() {
 
 
     private fun connectChannels(){
-        if(!connectedVideoChannel){
-            connectedVideoChannel = true
+        if(!isJoinedVideoChannel){
+            isJoinedVideoChannel = true
             setupVideoSDKEngine()
             joinVideoChannel()
         }
 
-        if(!connectedTextChannel){
-            connectedTextChannel = true
-            rtmConnection()
+        if(!isJoinedTextChannel){
+            isJoinedTextChannel = true
             loginTextChat()
             joinTextChat()
         }
 
-        if(!connectedVideoChannel)
+        if(!isJoinedVideoChannel)
             showToastMessage("Couldn't connect to the video channel!")
 
-        if(!connectedTextChannel)
+        if(!isJoinedTextChannel)
             showToastMessage("Couldn't connect to the text channel!")
     }
-
 
     //region video chat section
 
@@ -181,8 +181,8 @@ class LiveChatFragment : Fragment() {
                 override fun onPeersOnlineStatusChanged(map: Map<String, Int>) {}
                 override fun onMessageReceived(rtmMessage: RtmMessage, peerId: String) {}
             })
-        } catch (e: Exception) {
-            connectedTextChannel = false
+        } catch (_: Exception) {
+            isJoinedTextChannel = false
         }
     }
 
@@ -196,7 +196,7 @@ class LiveChatFragment : Fragment() {
             // By default, the video module is disabled, call enableVideo to enable it.
             agoraEngine!!.enableVideo()
         } catch (_: Exception) {
-            connectedVideoChannel = false
+            isJoinedVideoChannel = false
         }
     }
 
@@ -212,7 +212,7 @@ class LiveChatFragment : Fragment() {
         }
 
         override fun onJoinChannelSuccess(channel: String, uid: Int, elapsed: Int) {
-            isJoined = true
+            isJoinedVideoChannel = true
         }
 
         override fun onUserOffline(uid: Int, reason: Int) {
@@ -271,12 +271,12 @@ class LiveChatFragment : Fragment() {
             // You need to specify the user ID yourself, and ensure that it is unique in the channel.
             agoraEngine!!.joinChannel(null, ChannelID, uid, options)
         } catch(_: Exception){
-            connectedVideoChannel = false
+            isJoinedVideoChannel = false
         }
     }
 
     fun leaveChannel() {
-        if (!isJoined) {
+        if (!isJoinedVideoChannel) {
             showToastMessage("Join the channel first")
         } else {
             agoraEngine!!.leaveChannel()
@@ -285,7 +285,7 @@ class LiveChatFragment : Fragment() {
             if (remoteSurfaceView != null) remoteSurfaceView!!.visibility = View.GONE
             // Stop local video rendering.
             if (localSurfaceView != null) localSurfaceView!!.visibility = View.GONE
-            isJoined = false
+            isJoinedVideoChannel = false
         }
     }
 
@@ -305,11 +305,11 @@ class LiveChatFragment : Fragment() {
             mRtmClient!!.login(Token, viewModel.nickName, object : ResultCallback<Void?> {
                 override fun onSuccess(responseInfo: Void?) {}
                 override fun onFailure(errorInfo: ErrorInfo) {
-                    connectedTextChannel = false
+                    isJoinedTextChannel = false
                 }
             })
         } catch (_:Exception){
-            connectedTextChannel = false
+            isJoinedTextChannel = false
         }
     }
 
@@ -363,18 +363,17 @@ class LiveChatFragment : Fragment() {
         try {
             mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
         } catch (e: RuntimeException) {
-            connectedTextChannel = false
         }
         // Join the <Vg k="MESS" /> channel
         try{
             mRtmChannel!!.join(object : ResultCallback<Void?> {
                 override fun onSuccess(responseInfo: Void?) {}
                 override fun onFailure(errorInfo: ErrorInfo) {
-                    connectedTextChannel = false
+                    isJoinedTextChannel = false
                 }
             })
         } catch (_ : Exception){
-            connectedTextChannel = false
+            isJoinedTextChannel = false
         }
     }
 
@@ -398,9 +397,8 @@ class LiveChatFragment : Fragment() {
                 val text = "${viewModel.nickName} : ${message.text}"
                 writeToMessageHistory(text)
             }
-
             override fun onFailure(errorInfo: ErrorInfo) {
-                val text = "${mRtmChannel!!.id} Error: $errorInfo"
+                val text = "Couldn't connect to the text channel properly"
                 writeToMessageHistory(text)
             }
         })
@@ -495,4 +493,23 @@ class LiveChatFragment : Fragment() {
     }
 
     //endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

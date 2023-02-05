@@ -28,4 +28,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         _binding = null
     }
+
+
 }
