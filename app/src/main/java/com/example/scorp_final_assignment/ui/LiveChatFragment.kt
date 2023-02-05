@@ -6,7 +6,6 @@ import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -21,15 +20,11 @@ import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
-import com.example.scorp_final_assignment.internet_connectivity.ConnectivityObserver
 import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivity
-import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivityObserver
 import com.example.scorp_final_assignment.repository.Repository
 import com.example.scorp_final_assignment.repository.Repository.Token
 import com.example.scorp_final_assignment.repository.Repository.byteValueToImageDictionary
@@ -46,9 +41,6 @@ import java.time.LocalTime
 
 
 class LiveChatFragment : Fragment() {
-
-    private lateinit var networkConnectivityLiveData: NetworkConnectivity
-
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -71,14 +63,12 @@ class LiveChatFragment : Fragment() {
     //region message chat variables
     private var mRtmClient: RtmClient? = null
     private var mRtmChannel: RtmChannel? = null
-    private var jobList = mutableListOf<Repository.Gift>()
+    private var jobList = mutableListOf<Gift>()
     private var jobContinue = false
     //endregion
 
-
-    private lateinit var connectivityObserver: ConnectivityObserver
+    private lateinit var connectivityObserver: NetworkConnectivity
     var internetAvailable = true
-
 
     //region fragment override functions
     override fun onCreateView(
@@ -89,62 +79,49 @@ class LiveChatFragment : Fragment() {
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
         binding.textRecyclerView.adapter = messageAdapter
 
-        /*
-        connectivityObserver = NetworkConnectivityObserver(requireContext())
-
-        lifecycleScope.launch{
-            connectivityObserver.observe().collect{ status->
-
-                Log.d("Deneme", "AAAAAAFDSFSFSDF")
-
-                if(status == ConnectivityObserver.Status.Available){
-                    internetAvailable = true
-                    binding.connectionLostIV.visibility = View.GONE
-                    binding.connectionLostTV.visibility = View.GONE
-                }
-                else {
-                    leaveChannel()
-                    internetAvailable = false
-                    binding.connectionLostIV.visibility = View.VISIBLE
-                    binding.connectionLostTV.visibility = View.VISIBLE
-                }
-            }
-        }
-        */
-
-        networkConnectivityLiveData = NetworkConnectivity(requireContext())
-        networkConnectivityLiveData.observe(viewLifecycleOwner){
-            Log.d("Deneme", "AAAAAAFDSFSFSDF")
-            if (it) {
-                // Internet connection is available
-                internetAvailable = true
-                binding.connectionLostIV.visibility = View.GONE
-                binding.connectionLostTV.visibility = View.GONE
-            } else {
-                // Internet connection is not available
-                leaveChannel()
-                internetAvailable = false
-                binding.connectionLostIV.visibility = View.VISIBLE
-                binding.connectionLostTV.visibility = View.VISIBLE
-            }
-        }
-
-        if(!checkForInternet(requireContext())){
-            // Internet connection is not available
-            leaveChannel()
-            internetAvailable = false
-            binding.connectionLostIV.visibility = View.VISIBLE
-            binding.connectionLostTV.visibility = View.VISIBLE
-        }
+        internetConnection()
 
 
+        //connect text channel
         rtmConnection()
+        loginTextChat()
+        joinTextChat()
 
         binding.giftButton.setImageResource(R.drawable.gift_image)
         binding.chatButton.setImageResource(R.drawable.chat_image)
         binding.connectionLostIV.setImageResource(R.drawable.ic_connection_error)
 
         return binding.root
+    }
+
+    private fun internetConnection() {
+        connectivityObserver = NetworkConnectivity(requireContext())
+
+        lifecycleScope.launch{
+            connectivityObserver.observe().collect{ isConnectedToInternet->
+
+                if(isConnectedToInternet){
+                    internetAvailable = true
+                    binding.connectionLostIV.visibility = View.GONE
+                    binding.connectionLostTV.visibility = View.GONE
+                }
+                else {
+                    exitChannel()
+                    internetAvailable = false
+                    binding.connectionLostIV.visibility = View.VISIBLE
+                    binding.connectionLostTV.visibility = View.VISIBLE
+                }
+            }
+        }
+
+        // first check when open the page
+        if(!checkForInternet(requireContext())){
+            // Internet connection is not available
+            exitChannel()
+            internetAvailable = false
+            binding.connectionLostIV.visibility = View.VISIBLE
+            binding.connectionLostTV.visibility = View.VISIBLE
+        }
     }
 
 
@@ -359,6 +336,12 @@ class LiveChatFragment : Fragment() {
         if (!isJoinedVideoChannel) {
             showToastMessage("Join the channel first")
         } else {
+            exitChannel()
+        }
+    }
+
+    private fun exitChannel(){
+        if(isJoinedVideoChannel){
             agoraEngine!!.leaveChannel()
             showToastMessage("You left the channel")
             // Stop remote video rendering.
@@ -378,8 +361,6 @@ class LiveChatFragment : Fragment() {
     fun showSnackbar(content: String){
         Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
     }
-
-
 
     private fun checkForInternet(context: Context): Boolean {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
