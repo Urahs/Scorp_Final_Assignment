@@ -9,10 +9,7 @@ import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.SurfaceView
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -59,6 +56,8 @@ class LiveChatFragment : Fragment() {
     var isJoinedVideoChannel = false
     var isJoinedTextChannel = false
 
+    private var onGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+
     //region video chat variables
     private var localSurfaceView: SurfaceView? = null
     private var remoteSurfaceView: SurfaceView? = null
@@ -97,13 +96,13 @@ class LiveChatFragment : Fragment() {
                     binding.connectionLostTV.visibility = View.GONE
                 }
                 else {
+                    leaveChannel()
                     internetAvailable = false
                     binding.connectionLostIV.visibility = View.VISIBLE
                     binding.connectionLostTV.visibility = View.VISIBLE
                 }
             }
         }
-
 
         rtmConnection()
 
@@ -140,7 +139,7 @@ class LiveChatFragment : Fragment() {
 
 
         val rootView = requireActivity().findViewById<View>(android.R.id.content)
-        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+        onGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             val heightDiff = rootView.rootView.height - rootView.height
 
             // Keyboard is shown
@@ -160,7 +159,16 @@ class LiveChatFragment : Fragment() {
                 binding.giftButton.visibility = View.VISIBLE
             }
         }
+        rootView.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
     }
+
+    override fun onPause() {
+        super.onPause()
+        val rootView = requireActivity().findViewById<View>(android.R.id.content)
+        rootView.viewTreeObserver.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+    }
+
+
 
     fun dpToPx(context: Context, dp: Float): Int {
         return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
@@ -168,8 +176,8 @@ class LiveChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mRtmChannel!!.leave(null)
-        mRtmClient!!.logout(null)
+        mRtmChannel?.leave(null)
+        mRtmClient?.logout(null)
         _binding = null
     }
     //endregion
@@ -478,6 +486,7 @@ class LiveChatFragment : Fragment() {
         currentMessages.add(Repository.Message(record, LocalTime.now()))
         messageAdapter.submitList(currentMessages)
         binding.textRecyclerView.smoothScrollToPosition(messageAdapter.itemCount)
+        messageAdapter.notifyDataSetChanged()
     }
 
 
