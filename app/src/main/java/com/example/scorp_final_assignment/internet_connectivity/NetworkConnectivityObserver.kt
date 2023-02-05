@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class NetworkConnectivityObserver(
-    private val context: Context
+    context: Context
 ): ConnectivityObserver {
 
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -20,7 +20,7 @@ class NetworkConnectivityObserver(
             val callback = object : ConnectivityManager.NetworkCallback(){
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
-                    launch { send(ConnectivityObserver.Status.Avaliable) }
+                    launch { send(ConnectivityObserver.Status.Available) }
                 }
 
                 override fun onLost(network: Network) {
@@ -28,7 +28,6 @@ class NetworkConnectivityObserver(
                     launch { send(ConnectivityObserver.Status.Lost) }
                 }
             }
-
             connectivityManager.registerDefaultNetworkCallback(callback)
             awaitClose{
                 connectivityManager.unregisterNetworkCallback(callback)

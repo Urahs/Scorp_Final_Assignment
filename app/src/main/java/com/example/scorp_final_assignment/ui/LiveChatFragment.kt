@@ -1,12 +1,10 @@
 package com.example.scorp_final_assignment.ui
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -23,11 +21,14 @@ import io.agora.rtc2.video.VideoCanvas
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.internet_connectivity.ConnectivityObserver
+import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivity
 import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivityObserver
 import com.example.scorp_final_assignment.repository.Repository
 import com.example.scorp_final_assignment.repository.Repository.Token
@@ -41,11 +42,13 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import io.agora.rtm.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import java.time.LocalTime
 
 
 class LiveChatFragment : Fragment() {
+
+    private lateinit var networkConnectivityLiveData: NetworkConnectivity
+
 
     private val viewModel: MainViewModel by activityViewModels()
 
@@ -74,7 +77,7 @@ class LiveChatFragment : Fragment() {
 
 
     private lateinit var connectivityObserver: ConnectivityObserver
-    var internetAvailable = false
+    var internetAvailable = true
 
 
     //region fragment override functions
@@ -86,11 +89,15 @@ class LiveChatFragment : Fragment() {
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
         binding.textRecyclerView.adapter = messageAdapter
 
+        /*
         connectivityObserver = NetworkConnectivityObserver(requireContext())
 
         lifecycleScope.launch{
             connectivityObserver.observe().collect{ status->
-                if(status == ConnectivityObserver.Status.Avaliable){
+
+                Log.d("Deneme", "AAAAAAFDSFSFSDF")
+
+                if(status == ConnectivityObserver.Status.Available){
                     internetAvailable = true
                     binding.connectionLostIV.visibility = View.GONE
                     binding.connectionLostTV.visibility = View.GONE
@@ -103,6 +110,33 @@ class LiveChatFragment : Fragment() {
                 }
             }
         }
+        */
+
+        networkConnectivityLiveData = NetworkConnectivity(requireContext())
+        networkConnectivityLiveData.observe(viewLifecycleOwner){
+            Log.d("Deneme", "AAAAAAFDSFSFSDF")
+            if (it) {
+                // Internet connection is available
+                internetAvailable = true
+                binding.connectionLostIV.visibility = View.GONE
+                binding.connectionLostTV.visibility = View.GONE
+            } else {
+                // Internet connection is not available
+                leaveChannel()
+                internetAvailable = false
+                binding.connectionLostIV.visibility = View.VISIBLE
+                binding.connectionLostTV.visibility = View.VISIBLE
+            }
+        }
+
+        if(!checkForInternet(requireContext())){
+            // Internet connection is not available
+            leaveChannel()
+            internetAvailable = false
+            binding.connectionLostIV.visibility = View.VISIBLE
+            binding.connectionLostTV.visibility = View.VISIBLE
+        }
+
 
         rtmConnection()
 
@@ -167,8 +201,6 @@ class LiveChatFragment : Fragment() {
         val rootView = requireActivity().findViewById<View>(android.R.id.content)
         rootView.viewTreeObserver.removeOnGlobalLayoutListener(onGlobalLayoutListener)
     }
-
-
 
     fun dpToPx(context: Context, dp: Float): Int {
         return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
@@ -345,6 +377,20 @@ class LiveChatFragment : Fragment() {
 
     fun showSnackbar(content: String){
         Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
+    }
+
+
+
+    private fun checkForInternet(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else -> false
+        }
     }
 
     //endregion
