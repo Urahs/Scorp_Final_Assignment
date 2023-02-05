@@ -109,7 +109,7 @@
             android:layout_marginStart="5dp"
             android:layout_marginEnd="10dp"
             android:layout_weight="10"
-            android:hint="Say something...">
+            android:hint="@string/placeholder_message_area">
 
         </EditText>
 
@@ -162,5 +162,29 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_end="60dp" />
+
+    <ImageView
+        android:id="@+id/connectionLostIV"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toTopOf="@id/textRecyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginBottom="60dp"
+        tools:srcCompat="@drawable/ic_connection_error" />
+
+    <TextView
+        android:id="@+id/connectionLostTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:text="@string/connection_error"
+        android:textColor="@color/black"
+        android:textSize="35sp"
+        app:layout_constraintEnd_toEndOf="@id/connectionLostIV"
+        app:layout_constraintStart_toStartOf="@id/connectionLostIV"
+        app:layout_constraintTop_toBottomOf="@id/connectionLostIV" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

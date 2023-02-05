@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.SurfaceView
 import android.view.View
@@ -29,6 +30,8 @@ import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
+import com.example.scorp_final_assignment.internet_connectivity.ConnectivityObserver
+import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivityObserver
 import com.example.scorp_final_assignment.repository.Repository
 import com.example.scorp_final_assignment.repository.Repository.Token
 import com.example.scorp_final_assignment.repository.Repository.byteValueToImageDictionary
@@ -38,8 +41,10 @@ import com.example.scorp_final_assignment.repository.Repository.diamondGift
 import com.example.scorp_final_assignment.repository.Repository.heartGift
 import com.example.scorp_final_assignment.repository.Repository.spadeGift
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.snackbar.Snackbar
 import io.agora.rtm.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import java.time.LocalTime
 
 
@@ -69,6 +74,10 @@ class LiveChatFragment : Fragment() {
     //endregion
 
 
+    private lateinit var connectivityObserver: ConnectivityObserver
+    var internetAvailable = false
+
+
     //region fragment override functions
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,7 +87,29 @@ class LiveChatFragment : Fragment() {
         _binding = FragmentLiveChatBinding.inflate(inflater, container, false)
         binding.textRecyclerView.adapter = messageAdapter
 
+        connectivityObserver = NetworkConnectivityObserver(requireContext())
+
+        lifecycleScope.launch{
+            connectivityObserver.observe().collect{ status->
+                if(status == ConnectivityObserver.Status.Avaliable){
+                    internetAvailable = true
+                    binding.connectionLostIV.visibility = View.GONE
+                    binding.connectionLostTV.visibility = View.GONE
+                }
+                else {
+                    internetAvailable = false
+                    binding.connectionLostIV.visibility = View.VISIBLE
+                    binding.connectionLostTV.visibility = View.VISIBLE
+                }
+            }
+        }
+
+
         rtmConnection()
+
+        binding.giftButton.setImageResource(R.drawable.gift_image)
+        binding.chatButton.setImageResource(R.drawable.chat_image)
+        binding.connectionLostIV.setImageResource(R.drawable.ic_connection_error)
 
         return binding.root
     }
@@ -106,9 +137,6 @@ class LiveChatFragment : Fragment() {
         binding.sendTextMessageButton.setOnClickListener{
             onClickSendChannelMsg()
         }
-
-        binding.giftButton.setImageResource(R.drawable.gift_image)
-        binding.chatButton.setImageResource(R.drawable.chat_image)
 
 
         val rootView = requireActivity().findViewById<View>(android.R.id.content)
@@ -148,6 +176,12 @@ class LiveChatFragment : Fragment() {
 
 
     private fun connectChannels(){
+
+        if(!internetAvailable){
+            showSnackbar("Connection is lost!")
+            return
+        }
+
         if(!isJoinedVideoChannel){
             isJoinedVideoChannel = true
             setupVideoSDKEngine()
@@ -276,6 +310,12 @@ class LiveChatFragment : Fragment() {
     }
 
     fun leaveChannel() {
+
+        if(!internetAvailable){
+            showSnackbar("Connection is lost!")
+            return
+        }
+
         if (!isJoinedVideoChannel) {
             showToastMessage("Join the channel first")
         } else {
@@ -294,6 +334,11 @@ class LiveChatFragment : Fragment() {
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun showSnackbar(content: String){
+        Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
+    }
+
     //endregion
 
 
@@ -379,6 +424,11 @@ class LiveChatFragment : Fragment() {
 
     private fun openMessageButtonClick() {
 
+        if(!internetAvailable){
+            showSnackbar("Connection is lost!")
+            return
+        }
+
         val textField = binding.textField
         textField.requestFocus()
         val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -433,6 +483,11 @@ class LiveChatFragment : Fragment() {
 
 
     private fun showGiftMessages() {
+
+        if(!internetAvailable){
+            showSnackbar("Connection is lost!")
+            return
+        }
 
         val dialog = BottomSheetDialog(requireContext(), R.style.AppBottomSheetDialogTheme)
         //dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
