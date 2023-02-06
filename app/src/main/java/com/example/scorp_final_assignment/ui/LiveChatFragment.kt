@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.InputFilter
 import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
@@ -77,7 +78,6 @@ class LiveChatFragment : Fragment() {
         binding.textRecyclerView.adapter = messageAdapter
 
         internetConnection()
-        Log.d("Deneme", "TESTTTTTTTTT")
         connecToTextChannel()
 
         return binding.root
@@ -99,8 +99,32 @@ class LiveChatFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mRtmChannel?.leave(null)
-        mRtmClient?.logout(null)
+
+        mRtmClient!!.logout(
+            object : ResultCallback<Void> {
+                override fun onSuccess(p0: Void?) {
+                    Log.d("Deneme", "Successfully left the RTM channel")
+                }
+
+                override fun onFailure(errorCode: ErrorInfo) {
+                    Log.d("Deneme", "Failed to leave the RTM client: $errorCode")
+                }
+            }
+        )
+        mRtmChannel!!.leave(
+            object : ResultCallback<Void> {
+                override fun onSuccess(p0: Void?) {
+                    Log.d("Deneme", "Successfully left the RTM channel")
+                }
+
+                override fun onFailure(errorCode: ErrorInfo) {
+                    Log.d("Deneme", "Failed to leave the RTM channel: $errorCode")
+                }
+            }
+        )
+
+
+
         _binding = null
     }
     //endregion fragment override functions
@@ -138,6 +162,7 @@ class LiveChatFragment : Fragment() {
             })
         } catch (_: Exception) {
             isJoinedTextChannel = false
+            Log.d("Deneme", "rtmConnection")
         }
     }
 
@@ -281,10 +306,12 @@ class LiveChatFragment : Fragment() {
                 override fun onSuccess(responseInfo: Void?) {}
                 override fun onFailure(errorInfo: ErrorInfo) {
                     isJoinedTextChannel = false
+                    Log.d("Deneme", "loginTextChat >> onFailure")
                 }
             })
         } catch (_:Exception){
             isJoinedTextChannel = false
+            Log.d("Deneme", "loginTextChat")
         }
     }
 
@@ -326,17 +353,21 @@ class LiveChatFragment : Fragment() {
         }
         try {
             mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
-        } catch (_: RuntimeException) {}
+        } catch (_: RuntimeException) {
+            Log.d("Deneme", "joinTextChat catch")
+        }
 
         try{
             mRtmChannel!!.join(object : ResultCallback<Void?> {
                 override fun onSuccess(responseInfo: Void?) {}
                 override fun onFailure(errorInfo: ErrorInfo) {
                     isJoinedTextChannel = false
+                    Log.d("Deneme", "joinTextChat ONFAIL")
                 }
             })
         } catch (_ : Exception){
             isJoinedTextChannel = false
+            Log.d("Deneme", "joinTextChat 2")
         }
     }
 
@@ -347,7 +378,8 @@ class LiveChatFragment : Fragment() {
             return
         }
 
-        val textField = binding.textField
+        val textField = binding.messageEditText
+        textField.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(Repository.MaxTextMessageLength))
         textField.requestFocus()
         val inputMethodManager = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.showSoftInput(textField, InputMethodManager.SHOW_IMPLICIT)
@@ -357,8 +389,8 @@ class LiveChatFragment : Fragment() {
     private fun onClickSendTextMsg(view: View) {
 
         val message = mRtmClient!!.createMessage()
-        message.text = binding.textField.text.toString()
-        binding.textField.setText("")
+        message.text = binding.messageEditText.text.toString()
+        binding.messageEditText.setText("")
 
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
@@ -456,6 +488,7 @@ class LiveChatFragment : Fragment() {
 
     //region helper functions
     private fun connecToTextChannel() {
+        Log.d("Deneme", "AAAAAAAAAAAAA")
         rtmConnection()
         loginTextChat()
         joinTextChat()

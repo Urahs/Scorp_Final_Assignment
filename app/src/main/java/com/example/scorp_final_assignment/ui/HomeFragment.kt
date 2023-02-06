@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -25,6 +26,7 @@ import com.example.scorp_final_assignment.MainViewModel
 import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentHomeBinding
 import com.example.scorp_final_assignment.repository.Repository.MinNickNameLength
+import com.example.scorp_final_assignment.repository.Repository.MaxNickNameLength
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
@@ -64,7 +66,7 @@ class HomeFragment : Fragment() {
                 permissionCounter++
         }
         if(permissionCounter == permissions.size){
-            viewModel.changeNickName(binding.nickNameTV.text.toString())
+            viewModel.changeNickName(binding.nickNameEditText.text.toString())
             findNavController().navigate(R.id.action_homeFragment_to_liveChatFragment)
         }
     }
@@ -75,7 +77,9 @@ class HomeFragment : Fragment() {
     }
 
     private fun handleNickName() {
-        val nickNameTextField = binding.nickNameTV
+
+        val nickNameTextField = binding.nickNameEditText
+        nickNameTextField.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(MaxNickNameLength))
         binding.progressButton.isEnabled = false
 
         nickNameTextField.doOnTextChanged{ text, start, before, count ->
