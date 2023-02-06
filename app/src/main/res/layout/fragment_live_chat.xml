@@ -12,11 +12,11 @@
         android:id="@+id/bottomLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="10dp"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp"
         android:background="@drawable/bottom_layout_bg"
+        android:elevation="10dp"
         android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -111,18 +111,22 @@
 
     </LinearLayout>
 
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/textRecyclerView"
-        android:layout_width="400dp"
-        android:layout_height="250dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@drawable/recycler_view_bg"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline_top_recycler"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        android:paddingBottom="5dp"
+        android:background="@drawable/recycler_view_bg"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+
         app:stackFromEnd="true">
 
     </androidx.recyclerview.widget.RecyclerView>
@@ -177,9 +181,12 @@
 
     </LinearLayout>
 
-
-
-
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_top_recycler"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
