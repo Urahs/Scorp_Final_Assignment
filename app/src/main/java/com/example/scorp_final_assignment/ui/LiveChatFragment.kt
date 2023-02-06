@@ -44,16 +44,17 @@ class LiveChatFragment : Fragment() {
     private val binding get() = _binding!!
 
     //region video chat variables
-    var isJoinedVideoChannel = false
+    private var isJoinedVideoChannel = false
     private var localSurfaceView: SurfaceView? = null
     private var remoteSurfaceView: SurfaceView? = null
     private var agoraEngine: RtcEngine? = null
     private val uid = 0
+    private var remoteOnBigView = true
     //endregion
 
     //region message chat variables
-    val messageAdapter = MessageAdapter()
-    var isJoinedTextChannel = false
+    private val messageAdapter = MessageAdapter()
+    private var isJoinedTextChannel = false
     private var mRtmClient: RtmClient? = null
     private var mRtmChannel: RtmChannel? = null
     private var giftList = mutableListOf<Gift>()
@@ -62,7 +63,7 @@ class LiveChatFragment : Fragment() {
 
     private var onGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private lateinit var connectivityObserver: NetworkConnectivity
-    var internetAvailable = true
+    private var internetAvailable = true
 
 
     //region fragment override functions
@@ -103,7 +104,7 @@ class LiveChatFragment : Fragment() {
     //endregion fragment override functions
 
     //region video chat section
-    private fun joinOrLeaveChannel(){
+    private fun joinOrLeaveChannel(view: View){
 
         if(internetAvailable){
             if(!isJoinedVideoChannel){
@@ -171,13 +172,13 @@ class LiveChatFragment : Fragment() {
 
             activity!!.runOnUiThread {
                 remoteSurfaceView!!.visibility = View.GONE
-                binding.remoteVideoViewContainer.visibility = View.GONE
+                binding.bigVideoViewContainer.visibility = View.GONE
             }
         }
     }
 
     private fun setupRemoteVideo(uid: Int) {
-        val container = binding.remoteVideoViewContainer
+        val container = binding.bigVideoViewContainer
         remoteSurfaceView = SurfaceView(context)
         container.addView(remoteSurfaceView)
         agoraEngine!!.setupRemoteVideo(
@@ -193,7 +194,7 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun setupLocalVideo() {
-        val container = binding.localVideoViewContainer
+        val container = binding.smallVideoViewContainer
         container.visibility = View.VISIBLE
         localSurfaceView = SurfaceView(context)
         container.addView(localSurfaceView)
@@ -211,7 +212,6 @@ class LiveChatFragment : Fragment() {
     fun joinVideoChannel() {
         try{
             val options = ChannelMediaOptions()
-
             // For a Video call, set the channel profile as COMMUNICATION.
             options.channelProfile = Constants.CHANNEL_PROFILE_COMMUNICATION
             // Set the client role as BROADCASTER or AUDIENCE according to the scenario.
@@ -236,12 +236,34 @@ class LiveChatFragment : Fragment() {
 
             if (remoteSurfaceView != null) remoteSurfaceView!!.visibility = View.GONE
             if (localSurfaceView != null) localSurfaceView!!.visibility = View.GONE
-            binding.localVideoViewContainer.visibility = View.GONE
-            binding.remoteVideoViewContainer.visibility = View.GONE
+            binding.smallVideoViewContainer.visibility = View.GONE
+            binding.bigVideoViewContainer.visibility = View.GONE
             binding.joinLeaveButton.setImageResource(R.drawable.join_voice_chat)
 
             isJoinedVideoChannel = false
         }
+    }
+
+    private fun switchViewContainers(view: View){
+
+        fun changeSurfaceViews(surfaceView1: SurfaceView, surfaceView2: SurfaceView){
+            surfaceView1.setZOrderMediaOverlay(true)
+            surfaceView2.setZOrderMediaOverlay(false)
+            binding.bigVideoViewContainer.addView(surfaceView2)
+            binding.smallVideoViewContainer.addView(surfaceView1)
+        }
+
+        binding.bigVideoViewContainer.removeAllViews()
+        binding.smallVideoViewContainer.removeAllViews()
+
+        if(remoteOnBigView){
+            changeSurfaceViews(remoteSurfaceView!!, localSurfaceView!!)
+        }
+        else {
+            changeSurfaceViews(localSurfaceView!!, remoteSurfaceView!!)
+        }
+
+        remoteOnBigView = !remoteOnBigView
     }
     //endregion video chat section
 
@@ -313,7 +335,7 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-    private fun openMessageButtonClick() {
+    private fun openMessageButtonClick(view: View) {
 
         if(!internetAvailable){
             showSnackbar("Connection is lost!")
@@ -327,7 +349,7 @@ class LiveChatFragment : Fragment() {
     }
 
     // Button to send channel message
-    private fun onClickSendTextMsg() {
+    private fun onClickSendTextMsg(view: View) {
 
         val message = mRtmClient!!.createMessage()
         message.text = binding.textField.text.toString()
@@ -371,7 +393,7 @@ class LiveChatFragment : Fragment() {
 
 
 
-    private fun showGiftMessages() {
+    private fun showGiftMessages(view: View) {
 
         if(!internetAvailable){
             showSnackbar("Connection is lost!")
@@ -482,21 +504,11 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun buttonClickEvents() {
-        binding.joinLeaveButton.setOnClickListener {
-            joinOrLeaveChannel()
-        }
-
-        binding.giftButton.setOnClickListener{
-            showGiftMessages()
-        }
-
-        binding.chatButton.setOnClickListener{
-            openMessageButtonClick()
-        }
-
-        binding.sendTextMessageButton.setOnClickListener{
-            onClickSendTextMsg()
-        }
+        binding.joinLeaveButton.setOnClickListener(::joinOrLeaveChannel)
+        binding.giftButton.setOnClickListener(::showGiftMessages)
+        binding.chatButton.setOnClickListener(::openMessageButtonClick)
+        binding.sendTextMessageButton.setOnClickListener(::onClickSendTextMsg)
+        binding.smallVideoViewContainer.setOnClickListener(::switchViewContainers)
     }
 
     fun showToastMessage(message: String?) {
@@ -509,20 +521,4 @@ class LiveChatFragment : Fragment() {
         Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
     }
     //endregion helper functions
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

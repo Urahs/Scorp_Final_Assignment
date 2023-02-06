@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="margin_bot_keyboard">300dp</dimen>
+    <dimen name="small_view_corner_radius">20dp</dimen>
 </resources>
