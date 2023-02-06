@@ -3,10 +3,7 @@ package com.example.scorp_final_assignment.ui
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -270,6 +267,10 @@ class LiveChatFragment : Fragment() {
         val mRtmChannelListener: RtmChannelListener = object : RtmChannelListener {
             override fun onMemberCountUpdated(i: Int) {}
             override fun onAttributesUpdated(list: List<RtmChannelAttribute>) {}
+            override fun onImageMessageReceived(rtmImageMessage: RtmImageMessage, rtmChannelMember: RtmChannelMember) {}
+            override fun onFileMessageReceived(rtmFileMessage: RtmFileMessage, rtmChannelMember: RtmChannelMember) {}
+            override fun onMemberJoined(member: RtmChannelMember) {}
+            override fun onMemberLeft(member: RtmChannelMember) {}
             override fun onMessageReceived(message: RtmMessage, fromMember: RtmChannelMember) {
                 when(message.messageType){
 
@@ -295,27 +296,11 @@ class LiveChatFragment : Fragment() {
                     }
                 }
             }
-
-            override fun onImageMessageReceived(
-                rtmImageMessage: RtmImageMessage,
-                rtmChannelMember: RtmChannelMember
-            ) {
-            }
-
-            override fun onFileMessageReceived(
-                rtmFileMessage: RtmFileMessage,
-                rtmChannelMember: RtmChannelMember
-            ) {
-            }
-
-            override fun onMemberJoined(member: RtmChannelMember) {}
-            override fun onMemberLeft(member: RtmChannelMember) {}
         }
         try {
             mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
-        } catch (e: RuntimeException) {
-        }
-        // Join the <Vg k="MESS" /> channel
+        } catch (_: RuntimeException) {}
+
         try{
             mRtmChannel!!.join(object : ResultCallback<Void?> {
                 override fun onSuccess(responseInfo: Void?) {}
@@ -342,7 +327,7 @@ class LiveChatFragment : Fragment() {
     }
 
     // Button to send channel message
-    fun onClickSendChannelMsg() {
+    private fun onClickSendTextMsg() {
 
         val message = mRtmClient!!.createMessage()
         message.text = binding.textField.text.toString()
@@ -361,20 +346,17 @@ class LiveChatFragment : Fragment() {
     }
 
     // Button to send gift message
-    fun onClickSendGiftMsg(gift: ByteArray) {
+    private fun onClickSendGiftMsg(gift: ByteArray) {
 
         val message = mRtmClient!!.createMessage(gift)
 
-        // Send message to channel
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
-                val text = "Gift message is sent!"
-                writeToMessageHistory(text)
+                writeToMessageHistory("Gift message is sent!")
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
-                val text = "Gift message couldn't sent"
-                writeToMessageHistory(text)
+                writeToMessageHistory("Gift message couldn't sent")
             }
         })
     }
@@ -385,9 +367,6 @@ class LiveChatFragment : Fragment() {
         currentMessages.add(Repository.Message(record, LocalTime.now()))
         messageAdapter.submitList(currentMessages)
         binding.textRecyclerView.smoothScrollToPosition(messageAdapter.itemCount)
-
-
-        Log.d("Deneme", messageAdapter.currentList[0].content)
     }
 
 
@@ -463,9 +442,9 @@ class LiveChatFragment : Fragment() {
             binding.connectionLostLayout.visibility = View.VISIBLE
         }
 
-        connectivityObserver = NetworkConnectivity(requireContext())
+        connectivityObserver = NetworkConnectivity()
         lifecycleScope.launch{
-            connectivityObserver.observe().collect{ isConnectedToInternet->
+            connectivityObserver.observe(requireContext()).collect{ isConnectedToInternet->
 
                 if(isConnectedToInternet){
                     internetAvailable = true
@@ -477,20 +456,8 @@ class LiveChatFragment : Fragment() {
         }
 
         // first check when open the page
-        if(!checkForInternet(requireContext())){
+        if(!viewModel.checkForInternetConnection(requireContext())){
             noConnection()
-        }
-    }
-
-    private fun checkForInternet(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-        return when {
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
         }
     }
 
@@ -528,7 +495,7 @@ class LiveChatFragment : Fragment() {
         }
 
         binding.sendTextMessageButton.setOnClickListener{
-            onClickSendChannelMsg()
+            onClickSendTextMsg()
         }
     }
 

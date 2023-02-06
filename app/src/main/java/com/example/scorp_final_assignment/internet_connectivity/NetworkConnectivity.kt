@@ -9,11 +9,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-class NetworkConnectivity( context: Context) {
+class NetworkConnectivity() {
 
-    private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    fun observe(): Flow<Boolean> {
+    fun observe(context: Context): Flow<Boolean> {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return callbackFlow {
             val callback = object : ConnectivityManager.NetworkCallback(){
                 override fun onAvailable(network: Network) {

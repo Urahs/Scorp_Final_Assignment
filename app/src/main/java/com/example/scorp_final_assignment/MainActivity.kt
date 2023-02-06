@@ -8,6 +8,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.example.scorp_final_assignment.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
@@ -23,11 +24,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
     }
-
-
 }

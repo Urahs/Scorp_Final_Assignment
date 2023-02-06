@@ -35,19 +35,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private val requestPermission = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()){ permissions->
-        var permissionCounter = 0
-        permissions.forEach{
-            if(it.value)
-                permissionCounter++
-        }
-        if(permissionCounter == permissions.size){
-            viewModel.changeNickName(binding.nickNameTV.text.toString())
-            findNavController().navigate(R.id.action_homeFragment_to_liveChatFragment)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -64,11 +51,28 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private val requestPermission = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()){ permissions->
+        var permissionCounter = 0
+        permissions.forEach{
+            if(it.value)
+                permissionCounter++
+        }
+        if(permissionCounter == permissions.size){
+            viewModel.changeNickName(binding.nickNameTV.text.toString())
+            findNavController().navigate(R.id.action_homeFragment_to_liveChatFragment)
+        }
+    }
+
     fun isEnglishAlphabet(text: String): Boolean {
         val pattern = Regex("^[a-zA-Z]+$")
         return pattern.matches(text)
     }
-
 
     private fun handleNickName() {
         val nickNameTextField = binding.nickNameTV
@@ -119,11 +123,5 @@ class HomeFragment : Fragment() {
             }
             dialog.show()
         }
-    }
-
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -7,7 +7,7 @@ object Repository {
 
     const val MinNickNameLength = 4
     //const val AppID = "dca16fbf522b4c6f96ecc88721800310"
-    const val AppID = "09155caed6e0491482a59dd13ea8e8e2"
+    const val AppID = "0f70126287034cc4899df976c18ddf49"
     val Token = null
     //const val ChannelID = "a44c58de-311b-4033-b70f-1570406c156c"
     const val ChannelID = "a44c58de-311b-4033-a70f-1570406c156a"
@@ -16,7 +16,6 @@ object Repository {
     val heartGift = byteArrayOf(0x02)
     val diamondGift = byteArrayOf(0x03)
     val spadeGift = byteArrayOf(0x04)
-
 
     val byteValueToImageDictionary = mapOf(
         clubGift.contentToString() to R.drawable.club,
@@ -30,7 +29,6 @@ object Repository {
         val giftByteArray: ByteArray,
         val giftImage: Int?
     )
-
 
     data class Message(
         val content: String,
