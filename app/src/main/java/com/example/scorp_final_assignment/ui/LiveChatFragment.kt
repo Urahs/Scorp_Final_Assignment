@@ -385,17 +385,13 @@ class LiveChatFragment : Fragment() {
     }
 
     // Button to send gift message
-    private fun onClickSendGiftMsg(gift: Gift) {
+    private fun onClickSendGiftMsg(giftByteArray: ByteArray) {
 
-        val message = mRtmClient!!.createMessage(gift.giftByteArray)
+        val message = mRtmClient!!.createMessage(giftByteArray)
 
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
                 writeToMessageHistory("Gift message is sent!")
-
-                giftList.add(gift)
-                if(!displayingGift)
-                    showGift()
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
@@ -435,7 +431,11 @@ class LiveChatFragment : Fragment() {
 
     private fun sendGift(gift: Gift){
         if(gift.isSended)
-            onClickSendGiftMsg(gift)
+            onClickSendGiftMsg(gift.giftByteArray)
+
+        giftList.add(gift)
+        if(!displayingGift)
+            showGift()
     }
 
 
