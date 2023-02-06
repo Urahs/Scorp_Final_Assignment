@@ -5,63 +5,48 @@
     android:id="@+id/fragment_live_chat"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/home_bg"
     tools:context=".MainActivity">
 
-
-    <Button
-        android:id="@+id/JoinButton"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/remote_video_view_container"
-        android:layout_alignStart="@id/remote_video_view_container"
-        android:layout_marginBottom="5dp"
-        android:onClick="joinChannel"
-        android:text="Join"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/chatButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/LeaveButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/remote_video_view_container"
-        android:layout_alignEnd="@id/remote_video_view_container"
-        android:layout_marginBottom="5dp"
-        android:onClick="leaveChannel"
-        android:text="Leave"
+        android:elevation="10dp"
+        android:orientation="horizontal"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/giftButton" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline">
 
+        <ImageView
+            android:id="@+id/join_leave_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:src="@drawable/join_voice_chat"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageView
-        android:id="@+id/chatButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="5dp"
-        android:elevation="10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/giftButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/JoinButton"
-        android:src="@drawable/chat_image" />
+        <ImageView
+            android:id="@+id/giftButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:src="@drawable/gift_image"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageView
-        android:id="@+id/giftButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="5dp"
-        android:elevation="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/LeaveButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/chatButton"
-        android:src="@drawable/gift_image" />
+        <ImageView
+            android:id="@+id/chatButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            android:src="@drawable/chat_image"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/giftButton" />
+
+    </LinearLayout>
+
 
     <FrameLayout
         android:id="@+id/remote_video_view_container"
@@ -70,11 +55,10 @@
         android:layout_centerHorizontal="true"
         android:background="@android:color/darker_gray"
         android:isScrollContainer="false"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </FrameLayout>
+        app:layout_constraintTop_toTopOf="parent"></FrameLayout>
 
     <FrameLayout
         android:id="@+id/local_video_view_container"
@@ -83,7 +67,7 @@
         android:layout_below="@+id/remote_video_view_container"
         android:layout_centerHorizontal="true"
         android:background="@android:color/darker_gray"
-        android:visibility="visible"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -95,7 +79,6 @@
         android:layout_height="50dp"
         android:background="@color/white"
         android:orientation="horizontal"
-        android:paddingTop="5dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -112,19 +95,15 @@
 
         </EditText>
 
-        <TextView
+        <ImageView
             android:id="@+id/sendTextMessageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="0"
-            android:background="@color/black"
-            android:gravity="center"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text=">"
-            android:textColor="@color/white"
-            android:textSize="30sp" />
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/send_button_bg"
+            android:paddingStart="5dp"
+            android:src="@drawable/send_message_icon" />
+
 
     </LinearLayout>
 
@@ -132,11 +111,10 @@
         android:id="@+id/textRecyclerView"
         android:layout_width="400dp"
         android:layout_height="250dp"
-
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/rounded_corners"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/recycler_view_bg"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -158,11 +136,11 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
+        android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_end="60dp" />
+        app:layout_constraintGuide_end="65dp" />
 
     <LinearLayout
         android:id="@+id/connectionLostLayout"

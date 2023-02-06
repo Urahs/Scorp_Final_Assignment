@@ -6,7 +6,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scorp_final_assignment.databinding.ItemChatTextBinding
-import com.example.scorp_final_assignment.repository.Repository
 import com.example.scorp_final_assignment.repository.Repository.Message
 
 
@@ -32,7 +31,6 @@ class MessageAdapter: ListAdapter<Message, MessageAdapter.MessageViewHolder>(Tex
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val messageTV = holder.binding.textView
         val messageItem = getItem(position)
-        val hour = messageItem.time.hour
         messageTV.text = "[${organiseTheTime(messageItem.time.hour)}:${organiseTheTime(messageItem.time.minute)}] ${messageItem.content}"
     }
 }

@@ -2,15 +2,12 @@ package com.example.scorp_final_assignment.ui
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_CONTINUE_ON_SUBTREE
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
@@ -21,13 +18,7 @@ import com.example.scorp_final_assignment.repository.Repository.AppID
 import com.example.scorp_final_assignment.repository.Repository.ChannelID
 import io.agora.rtc2.*
 import io.agora.rtc2.video.VideoCanvas
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.ViewCompat.setWindowInsetsAnimationCallback
-import androidx.core.view.WindowInsetsAnimationCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.activityViewModels
 import com.example.scorp_final_assignment.adapters.MessageAdapter
 import com.example.scorp_final_assignment.R
@@ -55,13 +46,8 @@ class LiveChatFragment : Fragment() {
     private var _binding: FragmentLiveChatBinding? = null
     private val binding get() = _binding!!
 
-    var messageAdapter = MessageAdapter()
-    var isJoinedVideoChannel = false
-    var isJoinedTextChannel = false
-
-    private var onGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
-
     //region video chat variables
+    var isJoinedVideoChannel = false
     private var localSurfaceView: SurfaceView? = null
     private var remoteSurfaceView: SurfaceView? = null
     private var agoraEngine: RtcEngine? = null
@@ -69,14 +55,18 @@ class LiveChatFragment : Fragment() {
     //endregion
 
     //region message chat variables
+    val messageAdapter = MessageAdapter()
+    var isJoinedTextChannel = false
     private var mRtmClient: RtmClient? = null
     private var mRtmChannel: RtmChannel? = null
-    private var jobList = mutableListOf<Gift>()
-    private var jobContinue = false
+    private var giftList = mutableListOf<Gift>()
+    private var displayingGift = false
     //endregion
 
+    private var onGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private lateinit var connectivityObserver: NetworkConnectivity
     var internetAvailable = true
+
 
     //region fragment override functions
     override fun onCreateView(
@@ -93,87 +83,12 @@ class LiveChatFragment : Fragment() {
         return binding.root
     }
 
-
-    private fun connecToTextChannel() {
-        rtmConnection()
-        loginTextChat()
-        joinTextChat()
-    }
-
-    private fun internetConnection() {
-
-        fun noConnection(){
-            exitChannel()
-            internetAvailable = false
-            binding.connectionLostLayout.visibility = View.VISIBLE
-        }
-
-        connectivityObserver = NetworkConnectivity(requireContext())
-        lifecycleScope.launch{
-            connectivityObserver.observe().collect{ isConnectedToInternet->
-
-                if(isConnectedToInternet){
-                    internetAvailable = true
-                    binding.connectionLostLayout.visibility = View.GONE
-                }
-                else
-                    noConnection()
-            }
-        }
-
-        // first check when open the page
-        if(!checkForInternet(requireContext())){
-            noConnection()
-        }
-    }
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.JoinButton.setOnClickListener {
-            connectChannels()
-        }
-
-        binding.LeaveButton.setOnClickListener {
-            leaveChannel()
-        }
-
-        binding.giftButton.setOnClickListener{
-            showGiftMessages()
-        }
-
-        binding.chatButton.setOnClickListener{
-            openMessageButtonClick()
-        }
-
-        binding.sendTextMessageButton.setOnClickListener{
-            onClickSendChannelMsg()
-        }
-
-
-        val rootView = requireActivity().findViewById<View>(android.R.id.content)
-        onGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val heightDiff = rootView.rootView.height - rootView.height
-
-            // Keyboard is shown
-            if (heightDiff > dpToPx(requireActivity(), 200f)) {
-                binding.textArea.visibility = View.VISIBLE
-                binding.JoinButton.visibility = View.GONE
-                binding.LeaveButton.visibility = View.GONE
-                binding.chatButton.visibility = View.GONE
-                binding.giftButton.visibility = View.GONE
-            }
-            // Keyboard is hidden
-            else {
-                binding.textArea.visibility = View.GONE
-                binding.JoinButton.visibility = View.VISIBLE
-                binding.LeaveButton.visibility = View.VISIBLE
-                binding.chatButton.visibility = View.VISIBLE
-                binding.giftButton.visibility = View.VISIBLE
-            }
-        }
-        rootView.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
+        buttonClickEvents()
+        detectIfKeyboardOpened()
+        messageAdapter.submitList(mutableListOf())
     }
 
     override fun onPause() {
@@ -182,45 +97,32 @@ class LiveChatFragment : Fragment() {
         rootView.viewTreeObserver.removeOnGlobalLayoutListener(onGlobalLayoutListener)
     }
 
-    fun dpToPx(context: Context, dp: Float): Int {
-        return (dp * context.resources.displayMetrics.density + 0.5f).toInt()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         mRtmChannel?.leave(null)
         mRtmClient?.logout(null)
         _binding = null
     }
-    //endregion
-
-
-    private fun connectChannels(){
-
-        if(!internetAvailable){
-            showSnackbar("Connection is lost!")
-            return
-        }
-
-        if(!isJoinedVideoChannel){
-            isJoinedVideoChannel = true
-            setupVideoSDKEngine()
-            joinVideoChannel()
-        }
-
-        if(!isJoinedTextChannel){
-            isJoinedTextChannel = true
-            connecToTextChannel()
-        }
-
-        if(!isJoinedVideoChannel)
-            showToastMessage("Couldn't connect to the video channel!")
-
-        if(!isJoinedTextChannel)
-            showToastMessage("Couldn't connect to the text channel!")
-    }
+    //endregion fragment override functions
 
     //region video chat section
+    private fun joinOrLeaveChannel(){
+
+        if(internetAvailable){
+            if(!isJoinedVideoChannel){
+                isJoinedVideoChannel = true
+                setupVideoSDKEngine()
+                joinVideoChannel()
+                binding.joinLeaveButton.setImageResource(R.drawable.leave_video_chat)
+            }
+            else{
+                exitChannel()
+            }
+        }
+        else{
+            showSnackbar("Connection is lost!")
+        }
+    }
 
     private fun rtmConnection() {
         try {
@@ -258,7 +160,6 @@ class LiveChatFragment : Fragment() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
             showToastMessage("Remote user joined")
 
-            // Set the remote video view
             activity!!.runOnUiThread {
                 setupRemoteVideo(uid)
             }
@@ -273,6 +174,7 @@ class LiveChatFragment : Fragment() {
 
             activity!!.runOnUiThread {
                 remoteSurfaceView!!.visibility = View.GONE
+                binding.remoteVideoViewContainer.visibility = View.GONE
             }
         }
     }
@@ -289,11 +191,13 @@ class LiveChatFragment : Fragment() {
             )
         )
         // Display RemoteSurfaceView.
+        container.visibility = View.VISIBLE
         remoteSurfaceView!!.visibility = View.VISIBLE
     }
 
     private fun setupLocalVideo() {
         val container = binding.localVideoViewContainer
+        container.visibility = View.VISIBLE
         localSurfaceView = SurfaceView(context)
         container.addView(localSurfaceView)
         localSurfaceView!!.setZOrderMediaOverlay(true)
@@ -328,56 +232,21 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-    fun leaveChannel() {
-
-        if(!internetAvailable){
-            showSnackbar("Connection is lost!")
-            return
-        }
-
-        if (!isJoinedVideoChannel) {
-            showToastMessage("Join the channel first")
-        } else {
-            exitChannel()
-        }
-    }
-
     private fun exitChannel(){
         if(isJoinedVideoChannel){
             agoraEngine!!.leaveChannel()
             showToastMessage("You left the channel")
-            // Stop remote video rendering.
+
             if (remoteSurfaceView != null) remoteSurfaceView!!.visibility = View.GONE
-            // Stop local video rendering.
             if (localSurfaceView != null) localSurfaceView!!.visibility = View.GONE
+            binding.localVideoViewContainer.visibility = View.GONE
+            binding.remoteVideoViewContainer.visibility = View.GONE
+            binding.joinLeaveButton.setImageResource(R.drawable.join_voice_chat)
+
             isJoinedVideoChannel = false
         }
     }
-
-    fun showToastMessage(message: String?) {
-        lifecycleScope.launch{
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun showSnackbar(content: String){
-        Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
-    }
-
-    private fun checkForInternet(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-        return when {
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
-        }
-    }
-
-    //endregion
-
+    //endregion video chat section
 
     //region text chat section
 
@@ -511,11 +380,14 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun writeToMessageHistory(record: String) {
+
         val currentMessages = messageAdapter.currentList.toMutableList()
         currentMessages.add(Repository.Message(record, LocalTime.now()))
         messageAdapter.submitList(currentMessages)
         binding.textRecyclerView.smoothScrollToPosition(messageAdapter.itemCount)
-        messageAdapter.notifyDataSetChanged()
+
+
+        Log.d("Deneme", messageAdapter.currentList[0].content)
     }
 
 
@@ -544,8 +416,8 @@ class LiveChatFragment : Fragment() {
         if(gift.isSended)
             onClickSendGiftMsg(gift.giftByteArray)
 
-        jobList.add(gift)
-        if(!jobContinue)
+        giftList.add(gift)
+        if(!displayingGift)
             showGift()
     }
 
@@ -555,9 +427,9 @@ class LiveChatFragment : Fragment() {
         lifecycleScope.launch(Dispatchers.Main){
 
             val sentGiftIV = binding.sentGiftIV
-            jobContinue = true
+            displayingGift = true
 
-            sentGiftIV.setImageResource(jobList[0].giftImage!!)
+            sentGiftIV.setImageResource(giftList[0].giftImage!!)
             sentGiftIV.visibility = View.VISIBLE
 
             //animation
@@ -567,17 +439,109 @@ class LiveChatFragment : Fragment() {
             sentGiftIV.visibility = View.GONE
             delay(1000L)
 
-            jobList.removeAt(0)
-            jobContinue = false
-            if(jobList.isNotEmpty())
+            giftList.removeAt(0)
+            displayingGift = false
+            if(giftList.isNotEmpty())
                 showGift()
         }
     }
 
-    //endregion
+    //endregion text chat section
 
+    //region helper functions
+    private fun connecToTextChannel() {
+        rtmConnection()
+        loginTextChat()
+        joinTextChat()
+    }
 
+    private fun internetConnection() {
 
+        fun noConnection(){
+            exitChannel()
+            internetAvailable = false
+            binding.connectionLostLayout.visibility = View.VISIBLE
+        }
+
+        connectivityObserver = NetworkConnectivity(requireContext())
+        lifecycleScope.launch{
+            connectivityObserver.observe().collect{ isConnectedToInternet->
+
+                if(isConnectedToInternet){
+                    internetAvailable = true
+                    binding.connectionLostLayout.visibility = View.GONE
+                }
+                else
+                    noConnection()
+            }
+        }
+
+        // first check when open the page
+        if(!checkForInternet(requireContext())){
+            noConnection()
+        }
+    }
+
+    private fun checkForInternet(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return when {
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            else -> false
+        }
+    }
+
+    private fun detectIfKeyboardOpened() {
+
+        val rootView = requireActivity().findViewById<View>(android.R.id.content)
+        onGlobalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val heightDiff = rootView.rootView.height - rootView.height
+
+            // Keyboard is shown
+            if (heightDiff > (200f * requireContext().resources.displayMetrics.density + 0.5f).toInt()) {
+                binding.textArea.visibility = View.VISIBLE
+                binding.bottomLayout.visibility = View.GONE
+            }
+            // Keyboard is hidden
+            else {
+                binding.textArea.visibility = View.GONE
+                binding.bottomLayout.visibility = View.VISIBLE
+            }
+        }
+        rootView.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
+    }
+
+    private fun buttonClickEvents() {
+        binding.joinLeaveButton.setOnClickListener {
+            joinOrLeaveChannel()
+        }
+
+        binding.giftButton.setOnClickListener{
+            showGiftMessages()
+        }
+
+        binding.chatButton.setOnClickListener{
+            openMessageButtonClick()
+        }
+
+        binding.sendTextMessageButton.setOnClickListener{
+            onClickSendChannelMsg()
+        }
+    }
+
+    fun showToastMessage(message: String?) {
+        lifecycleScope.launch{
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun showSnackbar(content: String){
+        Snackbar.make(requireView(), content, Snackbar.LENGTH_SHORT).show()
+    }
+    //endregion helper functions
 
 
 
