@@ -89,7 +89,8 @@ class LiveChatFragment : Fragment() {
 
         buttonClickEvents()
         detectIfKeyboardOpened()
-        messageAdapter.submitList(mutableListOf())
+        //messageAdapter.submitList(mutableListOf())
+        messageAdapter.submitList(viewModel.textChannelMessages)
     }
 
     override fun onPause() {
@@ -101,6 +102,7 @@ class LiveChatFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
+        viewModel.textChannelMessages = messageAdapter.currentList.toMutableList()
         mRtmChannel?.leave(null)
         mRtmClient?.logout(null)
         _binding = null

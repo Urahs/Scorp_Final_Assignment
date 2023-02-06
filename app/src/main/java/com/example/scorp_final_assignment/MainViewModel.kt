@@ -16,15 +16,10 @@ class MainViewModel: ViewModel() {
     lateinit var nickName: String
         private set
 
-    private val _textChannelMessages = MutableLiveData(mutableListOf<Message>())
-    var textChannelMessages: LiveData<MutableList<Message>> = _textChannelMessages
+    var textChannelMessages = mutableListOf<Message>()
 
     fun changeNickName(value: String){
         nickName = value
-    }
-
-    fun addTextToChannel(message: Message){
-        _textChannelMessages.value!!.add(message)
     }
 
     fun checkForInternetConnection(context: Context): Boolean {
