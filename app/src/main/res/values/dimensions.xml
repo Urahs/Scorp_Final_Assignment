@@ -2,4 +2,5 @@
 <resources>
     <dimen name="small_view_corner_radius">20dp</dimen>
     <dimen name="recycler_view_corner_radius">10dp</dimen>
+    <dimen name="message_corner_radius">10dp</dimen>
 </resources>

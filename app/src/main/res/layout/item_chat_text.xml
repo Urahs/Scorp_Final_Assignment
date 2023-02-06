@@ -7,8 +7,10 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/message_bg"
         android:fontFamily="@font/alata"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
@@ -17,6 +19,7 @@
         android:textAlignment="viewStart"
         android:textColor="@color/black"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
