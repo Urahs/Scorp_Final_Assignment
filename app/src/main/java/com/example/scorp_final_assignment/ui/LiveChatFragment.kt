@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -76,6 +77,7 @@ class LiveChatFragment : Fragment() {
         binding.textRecyclerView.adapter = messageAdapter
 
         internetConnection()
+        Log.d("Deneme", "TESTTTTTTTTT")
         connecToTextChannel()
 
         return binding.root
@@ -245,6 +247,9 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun switchViewContainers(view: View){
+
+        if (remoteSurfaceView == null)
+            return
 
         fun changeSurfaceViews(surfaceView1: SurfaceView, surfaceView2: SurfaceView){
             surfaceView1.setZOrderMediaOverlay(true)

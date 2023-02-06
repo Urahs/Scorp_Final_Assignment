@@ -3,10 +3,10 @@
     android:shape="rectangle">
 
     <corners
-        android:bottomLeftRadius="10dp"
-        android:bottomRightRadius="10dp"
-        android:topLeftRadius="10dp"
-        android:topRightRadius="10dp" />
+        android:bottomLeftRadius="@dimen/recycler_view_corner_radius"
+        android:bottomRightRadius="@dimen/recycler_view_corner_radius"
+        android:topLeftRadius="@dimen/recycler_view_corner_radius"
+        android:topRightRadius="@dimen/recycler_view_corner_radius" />
 
     <solid android:color="#17000000"/>
 
