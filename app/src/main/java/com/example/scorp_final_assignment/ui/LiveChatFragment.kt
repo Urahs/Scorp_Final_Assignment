@@ -24,6 +24,7 @@ import com.example.scorp_final_assignment.R
 import com.example.scorp_final_assignment.databinding.FragmentLiveChatBinding
 import com.example.scorp_final_assignment.internet_connectivity.NetworkConnectivity
 import com.example.scorp_final_assignment.repository.Repository
+import com.example.scorp_final_assignment.repository.Repository.Message
 import com.example.scorp_final_assignment.repository.Repository.Token
 import com.example.scorp_final_assignment.repository.Repository.byteValueToImageDictionary
 import com.example.scorp_final_assignment.repository.Repository.clubGift
@@ -78,7 +79,7 @@ class LiveChatFragment : Fragment() {
         binding.textRecyclerView.adapter = messageAdapter
 
         internetConnection()
-        connecToTextChannel()
+        connectToTextChannel()
 
         return binding.root
     }
@@ -100,31 +101,8 @@ class LiveChatFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        mRtmClient!!.logout(
-            object : ResultCallback<Void> {
-                override fun onSuccess(p0: Void?) {
-                    Log.d("Deneme", "Successfully left the RTM channel")
-                }
-
-                override fun onFailure(errorCode: ErrorInfo) {
-                    Log.d("Deneme", "Failed to leave the RTM client: $errorCode")
-                }
-            }
-        )
-        mRtmChannel!!.leave(
-            object : ResultCallback<Void> {
-                override fun onSuccess(p0: Void?) {
-                    Log.d("Deneme", "Successfully left the RTM channel")
-                }
-
-                override fun onFailure(errorCode: ErrorInfo) {
-                    Log.d("Deneme", "Failed to leave the RTM channel: $errorCode")
-                }
-            }
-        )
-
-
-
+        mRtmChannel?.leave(null)
+        mRtmClient?.logout(null)
         _binding = null
     }
     //endregion fragment override functions
@@ -162,7 +140,6 @@ class LiveChatFragment : Fragment() {
             })
         } catch (_: Exception) {
             isJoinedTextChannel = false
-            Log.d("Deneme", "rtmConnection")
         }
     }
 
@@ -197,9 +174,12 @@ class LiveChatFragment : Fragment() {
         override fun onUserOffline(uid: Int, reason: Int) {
             showToastMessage("Remote user offline")
 
+            if(!remoteOnBigView)
+                switchViewContainers(null)
+
             activity!!.runOnUiThread {
-                remoteSurfaceView!!.visibility = View.GONE
-                binding.bigVideoViewContainer.visibility = View.GONE
+                remoteSurfaceView!!.visibility = View.INVISIBLE
+                binding.bigVideoViewContainer.visibility = View.INVISIBLE
             }
         }
     }
@@ -271,7 +251,7 @@ class LiveChatFragment : Fragment() {
         }
     }
 
-    private fun switchViewContainers(view: View){
+    private fun switchViewContainers(view: View?){
 
         if (remoteSurfaceView == null)
             return
@@ -283,17 +263,19 @@ class LiveChatFragment : Fragment() {
             binding.smallVideoViewContainer.addView(surfaceView1)
         }
 
-        binding.bigVideoViewContainer.removeAllViews()
-        binding.smallVideoViewContainer.removeAllViews()
+        requireActivity().runOnUiThread {
+            binding.bigVideoViewContainer.removeAllViews()
+            binding.smallVideoViewContainer.removeAllViews()
 
-        if(remoteOnBigView){
-            changeSurfaceViews(remoteSurfaceView!!, localSurfaceView!!)
-        }
-        else {
-            changeSurfaceViews(localSurfaceView!!, remoteSurfaceView!!)
-        }
+            if(remoteOnBigView){
+                changeSurfaceViews(remoteSurfaceView!!, localSurfaceView!!)
+            }
+            else {
+                changeSurfaceViews(localSurfaceView!!, remoteSurfaceView!!)
+            }
 
-        remoteOnBigView = !remoteOnBigView
+            remoteOnBigView = !remoteOnBigView
+        }
     }
     //endregion video chat section
 
@@ -303,15 +285,15 @@ class LiveChatFragment : Fragment() {
         // Log in to Signaling
         try {
             mRtmClient!!.login(Token, viewModel.nickName, object : ResultCallback<Void?> {
-                override fun onSuccess(responseInfo: Void?) {}
+                override fun onSuccess(responseInfo: Void?) {
+                    joinTextChat()
+                }
                 override fun onFailure(errorInfo: ErrorInfo) {
                     isJoinedTextChannel = false
-                    Log.d("Deneme", "loginTextChat >> onFailure")
                 }
             })
         } catch (_:Exception){
             isJoinedTextChannel = false
-            Log.d("Deneme", "loginTextChat")
         }
     }
 
@@ -353,21 +335,17 @@ class LiveChatFragment : Fragment() {
         }
         try {
             mRtmChannel = mRtmClient!!.createChannel(ChannelID, mRtmChannelListener)
-        } catch (_: RuntimeException) {
-            Log.d("Deneme", "joinTextChat catch")
-        }
+        } catch (_: RuntimeException) {}
 
         try{
             mRtmChannel!!.join(object : ResultCallback<Void?> {
                 override fun onSuccess(responseInfo: Void?) {}
                 override fun onFailure(errorInfo: ErrorInfo) {
                     isJoinedTextChannel = false
-                    Log.d("Deneme", "joinTextChat ONFAIL")
                 }
             })
         } catch (_ : Exception){
             isJoinedTextChannel = false
-            Log.d("Deneme", "joinTextChat 2")
         }
     }
 
@@ -398,32 +376,36 @@ class LiveChatFragment : Fragment() {
                 writeToMessageHistory(text)
             }
             override fun onFailure(errorInfo: ErrorInfo) {
-                val text = "Couldn't connect to the text channel properly"
+                val text = "Could not connect properly to the text channel."
                 writeToMessageHistory(text)
             }
         })
     }
 
     // Button to send gift message
-    private fun onClickSendGiftMsg(gift: ByteArray) {
+    private fun onClickSendGiftMsg(gift: Gift) {
 
-        val message = mRtmClient!!.createMessage(gift)
+        val message = mRtmClient!!.createMessage(gift.giftByteArray)
 
         mRtmChannel!!.sendMessage(message, object : ResultCallback<Void?> {
             override fun onSuccess(aVoid: Void?) {
                 writeToMessageHistory("Gift message is sent!")
+
+                giftList.add(gift)
+                if(!displayingGift)
+                    showGift()
             }
 
             override fun onFailure(errorInfo: ErrorInfo) {
-                writeToMessageHistory("Gift message couldn't sent")
+                writeToMessageHistory("The gift message was unable to be sent.")
             }
         })
     }
 
-    private fun writeToMessageHistory(record: String) {
+    private fun writeToMessageHistory(content: String) {
 
         val currentMessages = messageAdapter.currentList.toMutableList()
-        currentMessages.add(Repository.Message(record, LocalTime.now()))
+        currentMessages.add(Message(content, LocalTime.now()))
         messageAdapter.submitList(currentMessages)
         binding.textRecyclerView.smoothScrollToPosition(messageAdapter.itemCount)
     }
@@ -450,13 +432,8 @@ class LiveChatFragment : Fragment() {
     }
 
     private fun sendGift(gift: Gift){
-
         if(gift.isSended)
-            onClickSendGiftMsg(gift.giftByteArray)
-
-        giftList.add(gift)
-        if(!displayingGift)
-            showGift()
+            onClickSendGiftMsg(gift)
     }
 
 
@@ -487,11 +464,9 @@ class LiveChatFragment : Fragment() {
     //endregion text chat section
 
     //region helper functions
-    private fun connecToTextChannel() {
-        Log.d("Deneme", "AAAAAAAAAAAAA")
+    private fun connectToTextChannel() {
         rtmConnection()
         loginTextChat()
-        joinTextChat()
     }
 
     private fun internetConnection() {

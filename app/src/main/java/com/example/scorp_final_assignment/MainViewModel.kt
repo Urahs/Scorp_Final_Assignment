@@ -6,15 +6,25 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.View
 import android.view.ViewTreeObserver
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.scorp_final_assignment.repository.Repository.Message
 
-class MainViewModel(): ViewModel() {
+class MainViewModel: ViewModel() {
 
     lateinit var nickName: String
         private set
 
+    private val _textChannelMessages = MutableLiveData(mutableListOf<Message>())
+    var textChannelMessages: LiveData<MutableList<Message>> = _textChannelMessages
+
     fun changeNickName(value: String){
         nickName = value
+    }
+
+    fun addTextToChannel(message: Message){
+        _textChannelMessages.value!!.add(message)
     }
 
     fun checkForInternetConnection(context: Context): Boolean {
