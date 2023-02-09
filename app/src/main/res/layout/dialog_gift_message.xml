@@ -1,140 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayout"
+    android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_bg"
-    android:rowCount="2"
-    android:columnCount="2"
-    android:paddingLeft="10dp">
+    android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/clubLayout"
-        android:layout_marginStart="15dp"
-        android:layout_marginBottom="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_marginBottom="15dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/clubIV"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/club" />
-
-        <TextView
-            android:id="@+id/clubTV"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/clubLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Club"
-            android:layout_gravity="center"
-            android:textColor="@color/black"
-            android:textSize="25sp"
-            app:layout_constraintBottom_toBottomOf="@+id/clubIV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/clubIV"
-            app:layout_constraintTop_toTopOf="@+id/clubIV" />
-    </LinearLayout>
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/clubIV"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/club" />
+
+            <TextView
+                android:id="@+id/clubTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="Club"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+        </LinearLayout>
 
 
-
-    <LinearLayout
-        android:id="@+id/heartLayout"
-        android:layout_marginStart="40dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/heartIV"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spadeIV"
-            android:src="@drawable/heart" />
-
-        <TextView
-            android:id="@+id/heartTV"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/heartLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Heart"
-            android:layout_gravity="center"
-            android:textColor="@color/black"
-            android:textSize="25sp"
-            app:layout_constraintBottom_toBottomOf="@+id/heartIV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/clubIV"
-            app:layout_constraintTop_toTopOf="@+id/heartIV" />
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/heartIV"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/heart" />
+
+            <TextView
+                android:id="@+id/heartTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="Heart"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
 
     </LinearLayout>
 
-
-
     <LinearLayout
-        android:id="@+id/diamondLayout"
-        android:layout_marginStart="15dp"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/diamondIV"
-            android:layout_width="50dp"
-            android:layout_marginEnd="20dp"
-            android:layout_height="50dp"
-            android:src="@drawable/diamond" />
-
-        <TextView
-            android:id="@+id/diamondTV"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/diamondLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Diamond"
-            android:layout_gravity="center"
-            android:textColor="@color/black"
-            android:textSize="25sp"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/clubIV"
-            app:layout_constraintTop_toTopOf="@+id/diamondIV" />
+            android:layout_weight="1">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/diamondIV"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/diamond" />
+
+            <TextView
+                android:id="@+id/diamondTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="Diamond"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+
+        </LinearLayout>
 
 
-    <LinearLayout
-        android:id="@+id/spadeLayout"
-        android:layout_marginStart="40dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/spadeIV"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/diamondIV"
-            android:src="@drawable/spade" />
-
-        <TextView
-            android:id="@+id/spadeTV"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/spadeLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Spade"
-            android:layout_gravity="center"
-            android:textColor="@color/black"
-            android:textSize="25sp"
-            app:layout_constraintBottom_toBottomOf="@+id/spadeIV"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/clubIV"
-            app:layout_constraintTop_toTopOf="@+id/spadeIV" />
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/spadeIV"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:src="@drawable/spade" />
+
+            <TextView
+                android:id="@+id/spadeTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:text="Spade"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
 
     </LinearLayout>
 
 
-
-</GridLayout>
+</LinearLayout>
