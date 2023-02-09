@@ -9,7 +9,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.scorp_final_assignment"
+        applicationId "com.pixdeer.scorp_final_assignment"
         minSdk 28
         targetSdk 33
         versionCode 1
